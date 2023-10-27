@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-main_menu = InlineKeyboardMarkup(inline_keyboard=[
+menu = InlineKeyboardMarkup(inline_keyboard=[
    [
       InlineKeyboardButton(
          text='В бой',

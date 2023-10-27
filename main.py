@@ -1,10 +1,11 @@
 import asyncio
 import logging
-from aiogram import Bot, Dispatcher
-from aiogram.types import Message
+from aiogram import Bot, Dispatcher, F
+from aiogram.types import Message, CallbackQuery
 from aiogram.filters.command import Command
 
-from core.keyboards import main_menu
+from handlers import main_menu
+from core.keyboards import menu
 import config
 
 import sqlite3
@@ -18,7 +19,7 @@ dp = Dispatcher()
 # ********************** #
 # Функции для создания баз данных
 def create_achievements():
-   conn = sqlite3.connect('data/achievements.sql', check_same_thread=False)
+   conn = sqlite3.connect('Base/data/achievements.sql', check_same_thread=False)
    cur = conn.cursor()
 
    cur.execute('''CREATE TABLE IF NOT EXISTS achievements (
@@ -34,7 +35,7 @@ def create_achievements():
 create_achievements()
 
 def firstSeen(get_id):
-   conn = sqlite3.connect('data/achievements.sql', check_same_thread=False)
+   conn = sqlite3.connect('Base/data/achievements.sql', check_same_thread=False)
    cur = conn.cursor()
    cur.execute("SELECT id_tg FROM achievements WHERE id_tg=?", (get_id,))
    rez = cur.fetchall()
@@ -48,7 +49,7 @@ def firstSeen(get_id):
       return False
 
 def addUser(user_id):
-   conn = sqlite3.connect('data/achievements.sql', check_same_thread=False)
+   conn = sqlite3.connect('Base/data/achievements.sql', check_same_thread=False)
    cur = conn.cursor()
    cur.execute('INSERT INTO achievements (id_tg) VALUES (?)', (user_id,))
    conn.commit()
@@ -73,11 +74,15 @@ async def cmd_menu(message: Message):
       await message.bot.delete_message(chat_id, previous_menu_message_id)
       await message.bot.delete_message(chat_id, previous_menu_message_id - 1)
 
-   menu_message = await message.answer(reply_markup=main_menu, text='Вы находитесь в меню')
+   menu_message = await message.answer(reply_markup=menu, text='Вы находитесь в меню')
 
    menu_message_ids[chat_id] = menu_message.message_id
 
    await message.bot.pin_chat_message(chat_id, menu_message.message_id)
+
+@dp.callback_query(F.data == 'menu')
+async def cbd_menu(callback: CallbackQuery):
+   await callback.message.edit_text(text='Вы находитесь в меню', reply_markup=menu)
 
 
 # Создание базы данных
@@ -90,7 +95,7 @@ async def cmd_start(message: Message):
 # Очистка БД
 @dp.message(Command('clearall'))
 async def cmd_start(message: Message):
-   conn = sqlite3.connect('data/achievements.sql', check_same_thread=False)
+   conn = sqlite3.connect('Base/data/achievements.sql', check_same_thread=False)
    cur = conn.cursor()
 
    cur.execute('DELETE FROM achievements')
@@ -104,7 +109,7 @@ async def cmd_start(message: Message):
 # Удаление пользователя из БД
 @dp.message(Command('clear'))
 async def cmd_start(message: Message):
-   conn = sqlite3.connect('data/achievements.sql', check_same_thread=False)
+   conn = sqlite3.connect('Base/data/achievements.sql', check_same_thread=False)
    cur = conn.cursor()
    
    cur.execute('DELETE FROM achievements WHERE id_tg=?', (message.chat.id,))
@@ -124,6 +129,9 @@ async def cmd_data(message: Message):
 
 # Запуск процесса поллинга новых апдейтов
 async def main():
+   dp.include_router(main_menu.router)
+
+   await bot.delete_webhook(drop_pending_updates=True)
    await dp.start_polling(bot)
 
 if __name__ == "__main__":
