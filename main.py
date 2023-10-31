@@ -1,11 +1,13 @@
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, InlineKeyboardButton
 from aiogram.filters.command import Command
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from handlers import main_menu
-from core.keyboards import menu
+from handlers import main_menu, ac_desc
+from storylines import test_storie
+from core.keyboards import kb_menu
 import config
 
 import sqlite3
@@ -74,7 +76,7 @@ async def cmd_menu(message: Message):
       await message.bot.delete_message(chat_id, previous_menu_message_id)
       await message.bot.delete_message(chat_id, previous_menu_message_id - 1)
 
-   menu_message = await message.answer(reply_markup=menu, text='Вы находитесь в меню')
+   menu_message = await message.answer(reply_markup=kb_menu, text='Вы находитесь в меню')
 
    menu_message_ids[chat_id] = menu_message.message_id
 
@@ -82,7 +84,19 @@ async def cmd_menu(message: Message):
 
 @dp.callback_query(F.data == 'menu')
 async def cbd_menu(callback: CallbackQuery):
-   await callback.message.edit_text(text='Вы находитесь в меню', reply_markup=menu)
+   await callback.message.edit_text(text='Вы находитесь в меню', reply_markup=kb_menu)
+
+
+# тестовая история (надо переместить в меню)
+@dp.message(Command('storie'))
+async def cmd_storie(message: Message):
+   btn_text='Далее'
+   builder = InlineKeyboardBuilder()
+   builder.row(InlineKeyboardButton(
+      text=btn_text, callback_data='test_msg_1'
+   ))
+   
+   await message.answer(text='Добро пожаловать в тестовую историю', reply_markup=builder.as_markup())
 
 
 # Создание базы данных
@@ -129,28 +143,11 @@ async def cmd_data(message: Message):
 
 # Запуск процесса поллинга новых апдейтов
 async def main():
-   dp.include_router(main_menu.router)
+   dp.include_routers(main_menu.router, test_storie.router, ac_desc.router)
 
-   await bot.delete_webhook(drop_pending_updates=True)
+   # ответ на сообщения, отправленные до включения бота
+   # await bot.delete_webhook(drop_pending_updates=True)
    await dp.start_polling(bot)
 
 if __name__ == "__main__":
    asyncio.run(main())
-
-
-# временный архив
-'''
-Старая реализация меню. При количетсве пользователей больше 1 будет путаться и удалять не те сообщения
-menu_message_id = None
-@dp.message(Command('menu'))
-async def cmd_menu(message: Message, bot: Bot):
-   global menu_message_id
-   
-   if menu_message_id:
-      await bot.delete_message(chat_id=message.chat.id, message_id=menu_message_id)
-      await bot.delete_message(chat_id=message.chat.id, message_id=menu_message_id - 1) # удаляет команду пользователя
-   
-   menu_message = await message.answer(reply_markup=main_menu, text='Вы находитесь в меню')
-   menu_message_id = menu_message.message_id
-   await bot.pin_chat_message(menu_message_id)
-'''
