@@ -87,18 +87,6 @@ async def cbd_menu(callback: CallbackQuery):
    await callback.message.edit_text(text='Вы находитесь в меню', reply_markup=kb_menu)
 
 
-# тестовая история (надо переместить в меню)
-@dp.message(Command('storie'))
-async def cmd_storie(message: Message):
-   btn_text='Далее'
-   builder = InlineKeyboardBuilder()
-   builder.row(InlineKeyboardButton(
-      text=btn_text, callback_data='test_msg_1'
-   ))
-   
-   await message.answer(text='Добро пожаловать в тестовую историю', reply_markup=builder.as_markup())
-
-
 # Создание базы данных
 @dp.message(Command('bd'))
 async def cmd_start(message: Message):

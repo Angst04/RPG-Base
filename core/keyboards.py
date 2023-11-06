@@ -3,8 +3,8 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 kb_menu = InlineKeyboardMarkup(inline_keyboard=[
    [
       InlineKeyboardButton(
-         text='В бой',
-         callback_data='#'
+         text='Тестовый старт',
+         callback_data='test_msg_1'
       )
    ],
    [

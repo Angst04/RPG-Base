@@ -10,6 +10,9 @@ router = Router()
 
 @router.callback_query(F.data == 'test_msg_1')
 async def test_msg_1(callback: CallbackQuery):
+   await callback.message.answer(text='Добро пожаловать в тестовую историю')
+   sleep(1)
+
    builder = InlineKeyboardBuilder()
    builder.add(InlineKeyboardButton(text='*Далее*', callback_data='#'))
    await callback.message.edit_reply_markup(reply_markup=builder.as_markup())
