@@ -20,6 +20,23 @@ dp = Dispatcher()
 
 # ********************** #
 # Функции для создания баз данных
+def create_users_map():
+   conn = sqlite3.connect('Base/data/users_map.sql', check_same_thread=False)
+   cur = conn.cursor()
+
+   cur.execute('''CREATE TABLE IF NOT EXISTS users_map (
+               id INTEGER PRIMARY KEY AUTOINCREMENT,
+               id_tg INTEGER,
+               now_location TEXT DEFAULT Эвертон,
+               Copper INTEGER DEFAULT 0,
+               Emberwood INTEGER DEFAULT 0
+               )''')
+   conn.commit()
+
+   cur.close()
+   conn.close()
+create_users_map()
+
 def create_achievements():
    conn = sqlite3.connect('Base/data/achievements.sql', check_same_thread=False)
    cur = conn.cursor()
@@ -36,24 +53,24 @@ def create_achievements():
    conn.close()
 create_achievements()
 
-def firstSeen(get_id):
-   conn = sqlite3.connect('Base/data/achievements.sql', check_same_thread=False)
+def firstSeen(get_id, name):
+   conn = sqlite3.connect(f'Base/data/{name}.sql', check_same_thread=False)
    cur = conn.cursor()
-   cur.execute("SELECT id_tg FROM achievements WHERE id_tg=?", (get_id,))
+   cur.execute(f'SELECT id_tg FROM {name} WHERE id_tg=?', (get_id,))
    rez = cur.fetchall()
    cur.close()
    conn.close()
 
    if not rez:
-      addUser(get_id)
+      addUser(get_id, name)
       return True
    else:
       return False
 
-def addUser(user_id):
-   conn = sqlite3.connect('Base/data/achievements.sql', check_same_thread=False)
+def addUser(user_id, name):
+   conn = sqlite3.connect(f'Base/data/{name}.sql', check_same_thread=False)
    cur = conn.cursor()
-   cur.execute('INSERT INTO achievements (id_tg) VALUES (?)', (user_id,))
+   cur.execute(f'INSERT INTO {name} (id_tg) VALUES (?)', (user_id,))
    conn.commit()
    cur.close()
    conn.close()
@@ -90,7 +107,8 @@ async def cbd_menu(callback: CallbackQuery):
 # Создание базы данных
 @dp.message(Command('bd'))
 async def cmd_start(message: Message):
-   firstSeen(message.chat.id)
+   firstSeen(message.chat.id, 'achievements')
+   firstSeen(message.chat.id, 'users_map')
    await message.answer('Пользователь добавлен в БД')
 
 

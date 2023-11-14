@@ -3,6 +3,8 @@ from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery,ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from handlers import map
+
 from core.keyboards import kb_menu
 import sqlite3
 
@@ -29,3 +31,34 @@ async def cbd_achievements(callback: CallbackQuery):
       await callback.message.edit_text(text='Здесь ничего нет(', reply_markup=builder.as_markup())
 
    conn.close()
+
+
+@router.callback_query(F.data == 'map')
+async def cbd_map(callback: CallbackQuery):
+   conn = sqlite3.connect('Base/data/users_map.sql', check_same_thread=False)
+
+   builder = InlineKeyboardBuilder()
+   
+   now_location = conn.execute(f'SELECT now_location FROM users_map WHERE id_tg = {callback.message.chat.id}').fetchone()[0]
+   if now_location == 'Имение_Чапси':
+      builder.row(InlineKeyboardButton(text='*Имение Чапси* <- вы здесь', callback_data='#'))
+   else:
+      builder.row(InlineKeyboardButton(text=f'*{now_location}* <- вы здесь', callback_data='#'))
+
+   if now_location == 'Эвертон':
+      builder.row(InlineKeyboardButton(text='Имение Чапси', callback_data='Имениe_Чапси'))
+      builder.row(InlineKeyboardButton(text='Амбербрук', callback_data='Амбербрук'))
+   if now_location == 'Амбербрук':
+      builder.row(InlineKeyboardButton(text='Эвертон', callback_data='Эвертон'))
+      if conn.execute(f'SELECT Copper FROM users_map WHERE id_tg = {callback.message.chat.id}').fetchone()[0] == 1:
+         builder.row(InlineKeyboardButton(text='Коппер', callback_data='Коппер'))
+   if now_location == 'Имениe_Чапси':
+      builder.row(InlineKeyboardButton(text='Эвертон', callback_data='Эвертон'))
+      if conn.execute(f'SELECT Emberwood FROM users_map WHERE id_tg = {callback.message.chat.id}').fetchone()[0] == 1:
+         builder.row(InlineKeyboardButton(text='Эмбервуд', callback_data='Эмбервуд'))
+   
+   await callback.message.edit_text(text='Вы открываете карту. Куда отправимся?', reply_markup=builder.as_markup())
+
+   conn.close()
+
+router.include_routers(map.router)
