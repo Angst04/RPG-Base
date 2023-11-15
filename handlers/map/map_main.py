@@ -5,11 +5,14 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import sqlite3
 from core.keyboards import kb_map
+from handlers.map.map_func import transition
 
 router = Router()
 
 @router.callback_query(F.data == 'Имениe_Чапси')
 async def func(callback: CallbackQuery):
+   await transition(callback, 11, 'Имениe Чапси')
+
    conn = sqlite3.connect('Base/data/users_map.sql', check_same_thread=False)
    cur = conn.cursor()
 
@@ -22,6 +25,8 @@ async def func(callback: CallbackQuery):
 
 @router.callback_query(F.data == 'Амбербрук')
 async def func(callback: CallbackQuery):
+   await transition(callback, 8, 'Амбербрук')
+
    conn = sqlite3.connect('Base/data/users_map.sql', check_same_thread=False)
    cur = conn.cursor()
 
@@ -34,6 +39,8 @@ async def func(callback: CallbackQuery):
 
 @router.callback_query(F.data == 'Эвертон')
 async def func(callback: CallbackQuery):
+   await transition(callback, 12, 'Эвертон')
+
    conn = sqlite3.connect('Base/data/users_map.sql', check_same_thread=False)
    cur = conn.cursor()
 
@@ -46,6 +53,8 @@ async def func(callback: CallbackQuery):
 
 @router.callback_query(F.data == 'Коппер')
 async def func(callback: CallbackQuery):
+   await transition(callback, 10, 'Коппер')
+
    conn = sqlite3.connect('Base/data/users_map.sql', check_same_thread=False)
    cur = conn.cursor()
 

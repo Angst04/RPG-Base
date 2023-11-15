@@ -37,6 +37,21 @@ def create_users_map():
    conn.close()
 create_users_map()
 
+def create_users():
+   conn = sqlite3.connect('Base/data/users.sql', check_same_thread=False)
+   cur = conn.cursor()
+
+   cur.execute('''CREATE TABLE IF NOT EXISTS users (
+               id INTEGER PRIMARY KEY AUTOINCREMENT,
+               id_tg INTEGER,
+               speed INTEGER DEFAULT 5
+               )''')
+   conn.commit()
+
+   cur.close()
+   conn.close()
+create_users()
+
 def create_achievements():
    conn = sqlite3.connect('Base/data/achievements.sql', check_same_thread=False)
    cur = conn.cursor()
@@ -109,9 +124,36 @@ async def cbd_menu(callback: CallbackQuery):
 async def cmd_start(message: Message):
    firstSeen(message.chat.id, 'achievements')
    firstSeen(message.chat.id, 'users_map')
+   firstSeen(message.chat.id, 'users')
    await message.answer('Пользователь добавлен в БД')
 
 
+# данные пользователя
+@dp.message(Command('data'))
+async def cmd_data(message: Message):
+   await message.answer(f'Данные о пользователе: \n{message}')
+
+
+@dp.callback_query(F.data == '#')
+async def f(callback: CallbackQuery):
+   await callback.answer('ТЫК')
+
+
+# Запуск процесса поллинга новых апдейтов
+async def main():
+   dp.include_routers(main_menu.router, test_storie.router, ac_desc.router)
+
+   # ответ на сообщения, отправленные до включения бота
+   # await bot.delete_webhook(drop_pending_updates=True)
+   await dp.start_polling(bot)
+
+if __name__ == "__main__":
+   asyncio.run(main())
+
+
+
+"""
+Архив
 # Очистка БД
 @dp.message(Command('clearall'))
 async def cmd_start(message: Message):
@@ -139,21 +181,4 @@ async def cmd_start(message: Message):
    conn.close()
 
    await message.answer('Пользователь удалён из БД')
-
-
-# данные пользователя
-@dp.message(Command('data'))
-async def cmd_data(message: Message):
-   await message.answer(f'Данные о пользователе: \n{message}')
-
-
-# Запуск процесса поллинга новых апдейтов
-async def main():
-   dp.include_routers(main_menu.router, test_storie.router, ac_desc.router)
-
-   # ответ на сообщения, отправленные до включения бота
-   # await bot.delete_webhook(drop_pending_updates=True)
-   await dp.start_polling(bot)
-
-if __name__ == "__main__":
-   asyncio.run(main())
+"""

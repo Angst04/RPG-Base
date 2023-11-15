@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery,ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from handlers import map
+from handlers.map import map_main, map_environs
 
 from core.keyboards import kb_menu
 import sqlite3
@@ -41,9 +41,9 @@ async def cbd_map(callback: CallbackQuery):
    
    now_location = conn.execute(f'SELECT now_location FROM users_map WHERE id_tg = {callback.message.chat.id}').fetchone()[0]
    if now_location == 'Имение_Чапси':
-      builder.row(InlineKeyboardButton(text='*Имение Чапси* <- вы здесь', callback_data='#'))
+      builder.row(InlineKeyboardButton(text='Имение Чапси <- вы здесь', callback_data='#'))
    else:
-      builder.row(InlineKeyboardButton(text=f'*{now_location}* <- вы здесь', callback_data='#'))
+      builder.row(InlineKeyboardButton(text=f'{now_location} <- вы здесь', callback_data='#'))
 
    if now_location == 'Эвертон':
       builder.row(InlineKeyboardButton(text='Имение Чапси', callback_data='Имениe_Чапси'))
@@ -57,8 +57,28 @@ async def cbd_map(callback: CallbackQuery):
       if conn.execute(f'SELECT Emberwood FROM users_map WHERE id_tg = {callback.message.chat.id}').fetchone()[0] == 1:
          builder.row(InlineKeyboardButton(text='Эмбервуд', callback_data='Эмбервуд'))
    
+   builder.row(InlineKeyboardButton(text='Окрестности', callback_data='environs'))
+
    await callback.message.edit_text(text='Вы открываете карту. Куда отправимся?', reply_markup=builder.as_markup())
 
    conn.close()
 
-router.include_routers(map.router)
+@router.callback_query(F.data == 'environs')
+async def f(callback: CallbackQuery):
+   conn = sqlite3.connect('Base/data/users_map.sql', check_same_thread=False)
+   builder = InlineKeyboardBuilder()
+   now_location = conn.execute(f'SELECT now_location FROM users_map WHERE id_tg = {callback.message.chat.id}').fetchone()[0]
+   flag = False
+
+   if now_location == 'Эвертон':
+      flag = True
+      builder.row(InlineKeyboardButton(text='Лесопилка Доппи', callback_data='Лесопилка_Доппи'))
+   
+   builder.row(InlineKeyboardButton(text='Назад', callback_data='map'))
+
+   if flag:
+      await callback.message.edit_text(text='Вы открываете карту. Куда отправимся?', reply_markup=builder.as_markup())
+   else:
+      await callback.message.edit_text(text='В окрестностях ничего нет', reply_markup=builder.as_markup())
+
+router.include_routers(map_main.router, map_environs.router)
