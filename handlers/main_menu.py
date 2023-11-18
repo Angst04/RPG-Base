@@ -40,19 +40,17 @@ async def cbd_map(callback: CallbackQuery):
    builder = InlineKeyboardBuilder()
    
    now_location = conn.execute(f'SELECT now_location FROM users_map WHERE id_tg = {callback.message.chat.id}').fetchone()[0]
-   if now_location == 'Имение_Чапси':
-      builder.row(InlineKeyboardButton(text='Имение Чапси <- вы здесь', callback_data='#'))
-   else:
-      builder.row(InlineKeyboardButton(text=f'{now_location} <- вы здесь', callback_data='#'))
+
+   builder.row(InlineKeyboardButton(text=f'{now_location.title()} <- вы здесь', callback_data='#'))
 
    if now_location == 'Эвертон':
-      builder.row(InlineKeyboardButton(text='Имение Чапси', callback_data='Имениe_Чапси'))
+      builder.row(InlineKeyboardButton(text='Имение Чапси', callback_data='имение Чапси'))
       builder.row(InlineKeyboardButton(text='Амбербрук', callback_data='Амбербрук'))
    if now_location == 'Амбербрук':
       builder.row(InlineKeyboardButton(text='Эвертон', callback_data='Эвертон'))
       if conn.execute(f'SELECT Copper FROM users_map WHERE id_tg = {callback.message.chat.id}').fetchone()[0] == 1:
          builder.row(InlineKeyboardButton(text='Коппер', callback_data='Коппер'))
-   if now_location == 'Имениe_Чапси':
+   if now_location == 'имение Чапси':
       builder.row(InlineKeyboardButton(text='Эвертон', callback_data='Эвертон'))
       if conn.execute(f'SELECT Emberwood FROM users_map WHERE id_tg = {callback.message.chat.id}').fetchone()[0] == 1:
          builder.row(InlineKeyboardButton(text='Эмбервуд', callback_data='Эмбервуд'))
@@ -72,7 +70,7 @@ async def f(callback: CallbackQuery):
 
    if now_location == 'Эвертон':
       flag = True
-      builder.row(InlineKeyboardButton(text='Лесопилка Доппи', callback_data='Лесопилка_Доппи'))
+      builder.row(InlineKeyboardButton(text='Лесопилка Доппи', callback_data='Лесопилка Доппи'))
    
    builder.row(InlineKeyboardButton(text='Назад', callback_data='map'))
 

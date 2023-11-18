@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message, CallbackQuery, InlineKeyboardButton
+from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, FSInputFile
 from aiogram.filters.command import Command
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
@@ -35,7 +35,6 @@ def create_users_map():
 
    cur.close()
    conn.close()
-create_users_map()
 
 def create_users():
    conn = sqlite3.connect('Base/data/users.sql', check_same_thread=False)
@@ -50,7 +49,6 @@ def create_users():
 
    cur.close()
    conn.close()
-create_users()
 
 def create_achievements():
    conn = sqlite3.connect('Base/data/achievements.sql', check_same_thread=False)
@@ -66,7 +64,6 @@ def create_achievements():
 
    cur.close()
    conn.close()
-create_achievements()
 
 def firstSeen(get_id, name):
    conn = sqlite3.connect(f'Base/data/{name}.sql', check_same_thread=False)
@@ -102,12 +99,14 @@ menu_message_ids = {} # нужно перенести в бд !
 @dp.message(Command('menu'))
 async def cmd_menu(message: Message):
    chat_id = message.chat.id
+   media = FSInputFile('Base/data/images/black.png')
 
    if chat_id in menu_message_ids:
       previous_menu_message_id = menu_message_ids[chat_id]
       await message.bot.delete_message(chat_id, previous_menu_message_id)
       await message.bot.delete_message(chat_id, previous_menu_message_id - 1)
 
+   #menu_message = await message.answer_photo(caption='Вы находитесь в меню', reply_markup=kb_menu, photo=media)
    menu_message = await message.answer(reply_markup=kb_menu, text='Вы находитесь в меню')
 
    menu_message_ids[chat_id] = menu_message.message_id
@@ -122,6 +121,10 @@ async def cbd_menu(callback: CallbackQuery):
 # Создание базы данных
 @dp.message(Command('bd'))
 async def cmd_start(message: Message):
+   create_achievements()
+   create_users()
+   create_users_map()
+
    firstSeen(message.chat.id, 'achievements')
    firstSeen(message.chat.id, 'users_map')
    firstSeen(message.chat.id, 'users')
