@@ -115,7 +115,8 @@ async def cmd_menu(message: Message):
 
 @dp.callback_query(F.data == 'menu')
 async def cbd_menu(callback: CallbackQuery):
-   await callback.message.edit_text(text='Вы находитесь в меню', reply_markup=kb_menu)
+   await callback.message.delete()
+   await callback.message.answer(text='Вы находитесь в меню', reply_markup=kb_menu)
 
 
 # Создание базы данных

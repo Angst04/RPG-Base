@@ -2,17 +2,18 @@
 from asyncio import sleep, Event, create_task
 from aiogram import Router, F
 import aiogram
-from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import CallbackQuery, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import sqlite3
 from math import ceil
 from core.keyboards import kb_map
-#from handlers.map.map_func import transition
+from random import random
 
 router = Router()
 
 cancel_event = Event()
+
 
 async def transition(callback, distance, name):
    builder = InlineKeyboardBuilder()
@@ -43,7 +44,7 @@ async def transition(callback, distance, name):
       
       if new_text != callback.message.text or new_markup != callback.message.reply_markup:
          try:
-            await callback.message.edit_text(text=new_text, reply_markup=new_markup)
+            await callback.message.edit_caption(caption=new_text, reply_markup=new_markup)
          except aiogram.exceptions.TelegramBadRequest:
             pass
 
@@ -61,20 +62,19 @@ async def transition(callback, distance, name):
       cur.close()
       conn.close()
 
-      await callback.message.edit_text(text=f'Путешествие в {name.title()} завершено', reply_markup=builder.as_markup())
-      await callback.message.edit_caption(caption='Base/data/images/map_tiles/all_map.png')
+      await callback.message.edit_caption(caption=f'Путешествие в {name.title()} завершено', reply_markup=builder.as_markup())
 
 
 @router.callback_query(F.data == 'transition_cancel')
-async def cancel_transition(callback: CallbackQuery):
+async def cancelTransition(callback: CallbackQuery):
    global cancel_event
    cancel_event.set()
 
    builder = InlineKeyboardBuilder()
    builder.row(InlineKeyboardButton(text='Вернуться к карте', callback_data='map'))
 
-   await callback.message.edit_text(text='Путешествие отменено', reply_markup=builder.as_markup())
-   await callback.message.edit_caption(caption='Base/data/images/map_tiles/all_map.png')
+   await callback.message.delete()
+   await callback.message.answer(text='Путешествие отменено', reply_markup=builder.as_markup())
 
 
 @router.callback_query(F.data == 'имение Чапси')

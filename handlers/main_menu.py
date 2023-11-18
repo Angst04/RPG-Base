@@ -1,10 +1,9 @@
 from aiogram import Router, F
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery,ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import CallbackQuery,ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from handlers.map import map_main, map_environs
-
 from core.keyboards import kb_menu
 import sqlite3
 
@@ -36,30 +35,36 @@ async def cbd_achievements(callback: CallbackQuery):
 @router.callback_query(F.data == 'map')
 async def cbd_map(callback: CallbackQuery):
    conn = sqlite3.connect('Base/data/users_map.sql', check_same_thread=False)
-
-   builder = InlineKeyboardBuilder()
-   
    now_location = conn.execute(f'SELECT now_location FROM users_map WHERE id_tg = {callback.message.chat.id}').fetchone()[0]
 
+   builder = InlineKeyboardBuilder()
    builder.row(InlineKeyboardButton(text=f'{now_location.title()} <- вы здесь', callback_data='#'))
 
    if now_location == 'Эвертон':
+      photo = FSInputFile('Base/data/images/map_tiles/everton.jpg')
+
       builder.row(InlineKeyboardButton(text='Имение Чапси', callback_data='имение Чапси'))
       builder.row(InlineKeyboardButton(text='Амбербрук', callback_data='Амбербрук'))
    if now_location == 'Амбербрук':
+      photo = FSInputFile('Base/data/images/map_tiles/everton.jpg')
+
       builder.row(InlineKeyboardButton(text='Эвертон', callback_data='Эвертон'))
       if conn.execute(f'SELECT Copper FROM users_map WHERE id_tg = {callback.message.chat.id}').fetchone()[0] == 1:
          builder.row(InlineKeyboardButton(text='Коппер', callback_data='Коппер'))
    if now_location == 'имение Чапси':
+      photo = FSInputFile('Base/data/images/map_tiles/everton.jpg')
+
       builder.row(InlineKeyboardButton(text='Эвертон', callback_data='Эвертон'))
       if conn.execute(f'SELECT Emberwood FROM users_map WHERE id_tg = {callback.message.chat.id}').fetchone()[0] == 1:
          builder.row(InlineKeyboardButton(text='Эмбервуд', callback_data='Эмбервуд'))
    
-   builder.row(InlineKeyboardButton(text='Окрестности', callback_data='environs'))
-
-   await callback.message.edit_text(text='Вы открываете карту. Куда отправимся?', reply_markup=builder.as_markup())
 
    conn.close()
+
+   builder.row(InlineKeyboardButton(text='Окрестности', callback_data='environs'))
+
+   await callback.message.delete()
+   await callback.message.answer_photo(photo=photo, caption='Вы открываете карту. Куда отправимся?', reply_markup=builder.as_markup())
 
 @router.callback_query(F.data == 'environs')
 async def f(callback: CallbackQuery):
