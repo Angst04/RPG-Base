@@ -7,7 +7,7 @@ import sqlite3
 
 async def transition(callback, distance, name):  
    builder = InlineKeyboardBuilder()
-   builder.row(InlineKeyboardButton(text='Отменить путешествие', callback_data='map'))
+   builder.row(InlineKeyboardButton(text='Отменить путешествие', callback_data='transition_cancel'))
 
    conn = sqlite3.connect('Base/data/users.sql', check_same_thread=False)
 
