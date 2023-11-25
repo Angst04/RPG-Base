@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from aiogram.exceptions import TelegramBadRequest
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, FSInputFile
 from aiogram.filters.command import Command
@@ -44,6 +45,21 @@ def create_users():
                id INTEGER PRIMARY KEY AUTOINCREMENT,
                id_tg INTEGER,
                speed INTEGER DEFAULT 5
+               )''')
+   conn.commit()
+
+   cur.close()
+   conn.close()
+
+def create_transition_events():
+   conn = sqlite3.connect('Base/data/transition_events.sql', check_same_thread=False)
+   cur = conn.cursor()
+
+   cur.execute('''CREATE TABLE IF NOT EXISTS transition_events (
+               id INTEGER PRIMARY KEY AUTOINCREMENT,
+               id_tg INTEGER,
+               Западня INTEGER DEFAULT 0,
+               Чертополох INTEGER DEFAULT 0
                )''')
    conn.commit()
 
@@ -103,20 +119,29 @@ async def cmd_menu(message: Message):
 
    if chat_id in menu_message_ids:
       previous_menu_message_id = menu_message_ids[chat_id]
-      await message.bot.delete_message(chat_id, previous_menu_message_id)
-      await message.bot.delete_message(chat_id, previous_menu_message_id - 1)
+      try:
+         await message.bot.delete_message(chat_id, previous_menu_message_id)
+      except TelegramBadRequest:
+         pass
+      finally:
+         await message.bot.delete_message(chat_id, previous_menu_message_id - 1)
 
    #menu_message = await message.answer_photo(caption='Вы находитесь в меню', reply_markup=kb_menu, photo=media)
    menu_message = await message.answer(reply_markup=kb_menu, text='Вы находитесь в меню')
-
    menu_message_ids[chat_id] = menu_message.message_id
 
    await message.bot.pin_chat_message(chat_id, menu_message.message_id)
 
 @dp.callback_query(F.data == 'menu')
 async def cbd_menu(callback: CallbackQuery):
-   await callback.message.delete()
-   await callback.message.answer(text='Вы находитесь в меню', reply_markup=kb_menu)
+   try:
+      await callback.message.delete()
+   except TelegramBadRequest:
+      pass
+   menu_message = await callback.message.answer(text='Вы находитесь в меню', reply_markup=kb_menu)
+   menu_message_ids[callback.message.chat.id] = menu_message.message_id
+
+   await callback.message.bot.pin_chat_message(callback.message.chat.id, menu_message.message_id)
 
 
 # Создание базы данных
@@ -125,10 +150,13 @@ async def cmd_start(message: Message):
    create_achievements()
    create_users()
    create_users_map()
+   create_transition_events()
 
    firstSeen(message.chat.id, 'achievements')
    firstSeen(message.chat.id, 'users_map')
    firstSeen(message.chat.id, 'users')
+   firstSeen(message.chat.id, 'transition_events')
+
    await message.answer('Пользователь добавлен в БД')
 
 

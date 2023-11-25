@@ -1,4 +1,3 @@
-#import asyncio
 from asyncio import sleep, Event, create_task
 from aiogram import Router, F
 import aiogram
@@ -6,16 +5,16 @@ from aiogram.types import CallbackQuery, ReplyKeyboardRemove, InlineKeyboardMark
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import sqlite3
+from random import randint
 from math import ceil
-from core.keyboards import kb_map
-from random import random
+from apps.transition_events.events_main import transitionEvent
+from apps.transition_events.events_content import event_1, event_2
 
 router = Router()
 
 cancel_event = Event()
 
-
-async def transition(callback, distance, name):
+async def transition(callback, distance, name, type='city', subname=None):
    builder = InlineKeyboardBuilder()
    builder.row(InlineKeyboardButton(text='Отменить путешествие', callback_data='transition_cancel'))
 
@@ -33,14 +32,23 @@ async def transition(callback, distance, name):
       text = f'Время в пути около {ceil(time / 60)} минут'
 
    flag_transiton = True
-   for _ in range(int(time)):
+   try:
+      time_to_check_event = randint(10, time - 1)
+   except ValueError:
+      time_to_check_event = 9999
+
+   for i in range(int(time)):
+      if i == time_to_check_event:
+         await transitionEvent(callback=callback, chance=0.25)
       if cancel_event.is_set():
          flag_transiton = False
          break
-
-      new_text = f'Вы направляетесь в {name.title()}. {text}'
+      
+      if type == 'city':
+         new_text = f'Вы направляетесь в {name}. {text}'
+      else:
+         new_text = f'Вы направляетесь в {subname}. {text}'
       new_markup = builder.as_markup()
-
       
       if new_text != callback.message.text or new_markup != callback.message.reply_markup:
          try:
@@ -51,18 +59,28 @@ async def transition(callback, distance, name):
       await sleep(1)
    
    if flag_transiton:
-      builder = InlineKeyboardBuilder()
-      builder.row(InlineKeyboardButton(text='Продолжить путь', callback_data='map'))
-      builder.row(InlineKeyboardButton(text='Остаться', callback_data='menu'))
-
       conn = sqlite3.connect('Base/data/users_map.sql', check_same_thread=False)
-      cur = conn.cursor()   
-      cur.execute('UPDATE users_map SET now_location = ? WHERE id_tg=?', (name, callback.message.chat.id,))
+      cur = conn.cursor()
+      if type == 'city':
+         cur.execute('UPDATE users_map SET now_location = ? WHERE id_tg=?', (name, callback.message.chat.id,))
+      else:
+         cur.execute('UPDATE users_map SET now_location = ? WHERE id_tg=?', (subname, callback.message.chat.id,))
+
+      builder = InlineKeyboardBuilder()
+      if type == 'city':
+         builder.row(InlineKeyboardButton(text='Продолжить путь', callback_data='map'))
+      else:
+         builder.row(InlineKeyboardButton(text='Покинуть окрестности', callback_data=f'{name}'))
+      builder.row(InlineKeyboardButton(text='Остаться', callback_data='menu'))
+      
       conn.commit()
       cur.close()
       conn.close()
 
-      await callback.message.edit_caption(caption=f'Путешествие в {name.title()} завершено', reply_markup=builder.as_markup())
+      try:
+         await callback.message.edit_caption(caption=f'Путешествие в {name} завершено', reply_markup=builder.as_markup())
+      except aiogram.exceptions.TelegramBadRequest:
+         pass
 
 
 @router.callback_query(F.data == 'transition_cancel')
@@ -100,3 +118,5 @@ async def func(callback: CallbackQuery):
    global cancel_event
    cancel_event.clear()
    create_task(transition(callback, 1, 'Коппер'))
+
+router.include_routers(event_1.router, event_2.router)
