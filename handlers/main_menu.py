@@ -58,9 +58,9 @@ async def cbd_map(callback: CallbackQuery):
 
    # Окрестности
    elif now_location == 'лесопилка Доппи':
-      photo = FSInputFile('Base/data/images/map_tiles/everton.jpg') # нужно заменить фотку
+      photo = FSInputFile('Base/data/images/map_tiles/environs/everton_environs.jpg') # нужно заменить фотки
    elif now_location == 'тестовая локация':
-      photo = FSInputFile('Base/data/images/map_tiles/everton.jpg')
+      photo = FSInputFile('Base/data/images/map_tiles/environs/amberbrook_environs.jpg')
 
    else:
       photo = FSInputFile('Base/data/images/white.png')

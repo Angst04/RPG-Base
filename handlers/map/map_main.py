@@ -1,7 +1,7 @@
 from asyncio import sleep, Event, create_task
 from aiogram import Router, F
 import aiogram
-from aiogram.types import CallbackQuery, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
+from aiogram.types import CallbackQuery, InlineKeyboardButton, FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import sqlite3
@@ -38,8 +38,8 @@ async def transition(callback, distance, name, type='city', subname=None):
       time_to_check_event = 9999
 
    for i in range(int(time)):
-      if i == time_to_check_event:
-         await transitionEvent(callback=callback, chance=0.25)
+      if i == time_to_check_event and type == 'city':
+         await transitionEvent(callback=callback, chance=0.1)
       if cancel_event.is_set():
          flag_transiton = False
          break

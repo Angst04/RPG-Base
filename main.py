@@ -4,7 +4,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, FSInputFile
 from aiogram.filters.command import Command
-from aiogram.utils.keyboard import InlineKeyboardBuilder
+# from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from handlers import main_menu, ac_desc
 from storylines import test_storie
@@ -20,7 +20,7 @@ dp = Dispatcher()
 
 
 # ********************** #
-# Функции для создания баз данных
+# функции для создания баз данных
 def create_users_map():
    conn = sqlite3.connect('Base/data/users_map.sql', check_same_thread=False)
    cur = conn.cursor()
@@ -144,7 +144,7 @@ async def cbd_menu(callback: CallbackQuery):
    await callback.message.bot.pin_chat_message(callback.message.chat.id, menu_message.message_id)
 
 
-# Создание базы данных
+# создание базы данных
 @dp.message(Command('bd'))
 async def cmd_start(message: Message):
    create_achievements()
@@ -171,7 +171,7 @@ async def f(callback: CallbackQuery):
    await callback.answer('ТЫК')
 
 
-# Запуск процесса поллинга новых апдейтов
+# запуск процесса поллинга новых апдейтов
 async def main():
    dp.include_routers(main_menu.router, test_storie.router, ac_desc.router)
 
