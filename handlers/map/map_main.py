@@ -15,6 +15,7 @@ router = Router()
 cancel_event = Event()
 
 async def transition(callback, distance, name, type='city', subname=None):
+   await callback.answer('Движемся...')
    builder = InlineKeyboardBuilder()
    builder.row(InlineKeyboardButton(text='Отменить путешествие', callback_data='transition_cancel'))
 
@@ -47,7 +48,7 @@ async def transition(callback, distance, name, type='city', subname=None):
       if type == 'city':
          new_text = f'Вы направляетесь в {name}. {text}'
       else:
-         new_text = f'Вы направляетесь в {subname}. {text}'
+         new_text = f'Вы направляетесь в окрестность "{subname}". {text}'
       new_markup = builder.as_markup()
       
       if new_text != callback.message.text or new_markup != callback.message.reply_markup:
@@ -78,7 +79,11 @@ async def transition(callback, distance, name, type='city', subname=None):
       conn.close()
 
       try:
-         await callback.message.edit_caption(caption=f'Путешествие в {name} завершено', reply_markup=builder.as_markup())
+         if type == 'city':
+            await callback.message.edit_caption(caption=f'Путешествие в {name} завершено', reply_markup=builder.as_markup())
+         else:
+            await callback.message.edit_caption(caption=f'Путешествие в окрестность "{subname}" завершено', reply_markup=builder.as_markup())
+
       except aiogram.exceptions.TelegramBadRequest:
          pass
 

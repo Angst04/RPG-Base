@@ -8,7 +8,7 @@ from aiogram.filters.command import Command
 
 from handlers import main_menu, ac_desc
 from storylines import test_storie
-from core.keyboards import kb_menu
+from core.keyboards import kb_menu, kb_menu_other
 import config
 
 import sqlite3
@@ -58,6 +58,7 @@ def create_transition_events():
    cur.execute('''CREATE TABLE IF NOT EXISTS transition_events (
                id INTEGER PRIMARY KEY AUTOINCREMENT,
                id_tg INTEGER,
+               last_event INTEGER DEFAULT 0,
                Западня INTEGER DEFAULT 0,
                Чертополох INTEGER DEFAULT 0
                )''')
@@ -121,10 +122,9 @@ async def cmd_menu(message: Message):
       previous_menu_message_id = menu_message_ids[chat_id]
       try:
          await message.bot.delete_message(chat_id, previous_menu_message_id)
-      except TelegramBadRequest:
-         pass
-      finally:
          await message.bot.delete_message(chat_id, previous_menu_message_id - 1)
+      except TelegramBadRequest:
+         await message.bot.delete_message(chat_id, previous_menu_message_id)
 
    #menu_message = await message.answer_photo(caption='Вы находитесь в меню', reply_markup=kb_menu, photo=media)
    menu_message = await message.answer(reply_markup=kb_menu, text='Вы находитесь в меню')
@@ -134,15 +134,25 @@ async def cmd_menu(message: Message):
 
 @dp.callback_query(F.data == 'menu')
 async def cbd_menu(callback: CallbackQuery):
+   need_pin = True
    try:
-      await callback.message.delete()
+      menu_message = await callback.message.edit_text(text='Вы находитесь в меню', reply_markup=kb_menu)
+      need_pin = False
    except TelegramBadRequest:
-      pass
-   menu_message = await callback.message.answer(text='Вы находитесь в меню', reply_markup=kb_menu)
+      try:
+         await callback.message.delete()
+      except TelegramBadRequest:
+         pass
+      menu_message = await callback.message.answer(text='Вы находитесь в меню', reply_markup=kb_menu)
    menu_message_ids[callback.message.chat.id] = menu_message.message_id
 
-   await callback.message.bot.pin_chat_message(callback.message.chat.id, menu_message.message_id)
+   if need_pin:
+      await callback.message.bot.pin_chat_message(callback.message.chat.id, menu_message.message_id)
 
+
+@dp.callback_query(F.data == 'menu_other')
+async def cbd_menu_other(callback: CallbackQuery):
+   await callback.message.edit_text(text='Вы находитесь в меню', reply_markup=kb_menu_other)
 
 # создание базы данных
 @dp.message(Command('bd'))

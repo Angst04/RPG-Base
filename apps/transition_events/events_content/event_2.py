@@ -10,6 +10,14 @@ router = Router()
 async def start(callback):
    await callback.message.delete()
    
+   conn = sqlite3.connect('Base/data/transition_events.sql', check_same_thread=False)
+   cur = conn.cursor()
+
+   cur.execute('UPDATE transition_events SET Чертополох = 1 WHERE id_tg=?', (callback.message.chat.id,))
+   conn.commit()
+   cur.close()
+   conn.close()
+   
    builder = InlineKeyboardBuilder()
    builder.row(InlineKeyboardButton(text='Далее', callback_data='msg1'))
 

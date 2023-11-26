@@ -21,7 +21,7 @@ async def cbd_achievements(callback: CallbackQuery):
       builder.row(InlineKeyboardButton('Не менее серьёзный выбор', callback_data='AC2'))
       k += 1
 
-   builder.row(InlineKeyboardButton(text='Назад', callback_data='menu'))
+   builder.row(InlineKeyboardButton(text='Назад', callback_data='menu_other'))
    if k > 0:
       await callback.message.edit_text(text='Ваши достижения', reply_markup=builder.as_markup())
    elif k == 0:
@@ -91,12 +91,12 @@ async def f(callback: CallbackQuery):
 
    if now_location == 'Эвертон':
       flag = True
-      builder.row(InlineKeyboardButton(text='лесопилка Доппи', callback_data='лесопилка Доппи'))
+      builder.row(InlineKeyboardButton(text='Лесопилка Доппи', callback_data='лесопилка Доппи'))
       photo = FSInputFile('Base/data/images/map_tiles/environs/everton_environs.jpg')
 
    elif now_location == 'Амбербрук':
       flag = True
-      builder.row(InlineKeyboardButton(text='тестовая локация', callback_data='тестовая локация'))
+      builder.row(InlineKeyboardButton(text='Тестовая локация', callback_data='тестовая локация'))
       photo = FSInputFile('Base/data/images/map_tiles/environs/amberbrook_environs.jpg')
 
    builder.row(InlineKeyboardButton(text='Назад', callback_data='map'))

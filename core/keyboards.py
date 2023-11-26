@@ -3,14 +3,23 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 kb_menu = InlineKeyboardMarkup(inline_keyboard=[
    [
       InlineKeyboardButton(
-         text='Тестовый старт',
-         callback_data='test_msg_1'
+         text='Карта',
+         callback_data='map'
       )
    ],
    [
       InlineKeyboardButton(
-         text='Карта',
-         callback_data='map'
+         text='Дополнительно',
+         callback_data='menu_other'
+      )
+   ]
+])
+
+kb_menu_other = InlineKeyboardMarkup(inline_keyboard=[
+   [
+      InlineKeyboardButton(
+         text='Тестовый старт',
+         callback_data='test_msg_1'
       )
    ],
    [
@@ -19,4 +28,10 @@ kb_menu = InlineKeyboardMarkup(inline_keyboard=[
          callback_data='achievements'
       )
    ],
+   [
+      InlineKeyboardButton(
+         text='Главное меню',
+         callback_data='menu'
+      )
+   ]
 ])
