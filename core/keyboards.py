@@ -1,10 +1,16 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 
 kb_menu = InlineKeyboardMarkup(inline_keyboard=[
    [
       InlineKeyboardButton(
          text='Карта',
          callback_data='map'
+      )
+   ],
+   [
+      InlineKeyboardButton(
+         text='Колекция',
+         web_app=WebAppInfo(url='https://angst04.github.io/RPG-Mini-Apps/')
       )
    ],
    [
