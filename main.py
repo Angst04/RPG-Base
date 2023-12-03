@@ -2,11 +2,11 @@ import asyncio
 import logging
 from aiogram.exceptions import TelegramBadRequest
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, FSInputFile
+from aiogram.types import Message, CallbackQuery, FSInputFile, ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
 from aiogram.filters.command import Command
-# from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from handlers import main_menu, ac_desc
+
+from handlers import main_menu, ac_desc, webapp
 from storylines import test_storie
 from core.keyboards import kb_menu, kb_menu_other
 import config
@@ -105,11 +105,13 @@ def addUser(user_id, name):
    conn.close()
 # ********************** #
 
-
 @dp.message(Command('start'))
 async def cmd_start(message: Message):
-   await message.answer('Бот работает')
-
+   kb = [
+      [KeyboardButton(text="Mini App", web_app=WebAppInfo(url='https://bespoke-boba-ec8951.netlify.app'))],
+   ]
+   keyboard = ReplyKeyboardMarkup(keyboard=kb)
+   await message.answer("Бот работает", reply_markup=keyboard)
 
 # главное меню
 menu_message_ids = {} # нужно перенести в бд !
@@ -183,7 +185,7 @@ async def f(callback: CallbackQuery):
 
 # запуск процесса поллинга новых апдейтов
 async def main():
-   dp.include_routers(main_menu.router, test_storie.router, ac_desc.router)
+   dp.include_routers(main_menu.router, test_storie.router, ac_desc.router, webapp.router)
 
    # ответ на сообщения, отправленные до включения бота
    # await bot.delete_webhook(drop_pending_updates=True)
