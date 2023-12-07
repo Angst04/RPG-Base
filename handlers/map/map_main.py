@@ -4,7 +4,9 @@ import aiogram
 from aiogram.types import CallbackQuery, InlineKeyboardButton, FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-import sqlite3
+import psycopg2
+from core.dbs_config import host, user, password, db_name
+
 from random import randint
 from math import ceil
 from apps.transition_events.events_main import transitionEvent
@@ -19,8 +21,17 @@ async def transition(callback, distance, name, type='city', subname=None):
    builder = InlineKeyboardBuilder()
    builder.row(InlineKeyboardButton(text='Отменить путешествие', callback_data='transition_cancel'))
 
-   conn = sqlite3.connect('Base/data/users.sql', check_same_thread=False)
-   speed = conn.execute(f'SELECT speed FROM users WHERE id_tg = {callback.message.chat.id}').fetchone()[0]
+   conn = psycopg2.connect(
+      host=host,
+      user=user,
+      password=password,
+      database=db_name
+   )
+   cur = conn.cursor()
+
+   cur.execute(f'SELECT speed FROM users WHERE id_tg = %s', [callback.message.chat.id])
+   speed = cur.fetchone()[0]
+   cur.close()
    conn.close()
 
    time = distance / speed * 60
@@ -60,12 +71,18 @@ async def transition(callback, distance, name, type='city', subname=None):
       await sleep(1)
    
    if flag_transiton:
-      conn = sqlite3.connect('Base/data/users_map.sql', check_same_thread=False)
+      conn = psycopg2.connect(
+         host=host,
+         user=user,
+         password=password,
+         database=db_name
+      )
       cur = conn.cursor()
+
       if type == 'city':
-         cur.execute('UPDATE users_map SET now_location = ? WHERE id_tg=?', (name, callback.message.chat.id,))
+         cur.execute(f'UPDATE users_map SET now_location = %s WHERE id_tg=%s', [name, callback.message.chat.id,])
       else:
-         cur.execute('UPDATE users_map SET now_location = ? WHERE id_tg=?', (subname, callback.message.chat.id,))
+         cur.execute(f'UPDATE users_map SET now_location = %s WHERE id_tg=%s', [subname, callback.message.chat.id,])
 
       builder = InlineKeyboardBuilder()
       if type == 'city':
