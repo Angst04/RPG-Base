@@ -65,6 +65,29 @@ def start():
                   a1 INTEGER DEFAULT 0,
                   a2 INTEGER DEFAULT 0
                   )''')
+      
+      cur.execute('''CREATE TABLE IF NOT EXISTS collections (
+                  id serial PRIMARY KEY,
+                  id_tg INTEGER,
+                  c_0001 INTEGER DEFAULT 1,
+                  c_0002 INTEGER DEFAULT 1,
+                  c_0003 INTEGER DEFAULT 0,
+                  c_0004 INTEGER DEFAULT 0
+                  )''')
+
+      cur.execute('''CREATE TABLE IF NOT EXISTS inventories (
+                  id serial PRIMARY KEY,
+                  id_tg INTEGER,
+                  card_1 INTEGER DEFAULT c_0001,
+                  card_2 INTEGER DEFAULT c_0002,
+                  card_3 INTEGER DEFAULT 0,
+                  card_4 INTEGER DEFAULT 0,
+                  card_5 INTEGER DEFAULT 0,
+                  card_6 INTEGER DEFAULT 0,
+                  card_7 INTEGER DEFAULT 0,
+                  card_8 INTEGER DEFAULT 0,
+                  card_9 INTEGER DEFAULT 0
+                  )''')
 
    except Exception as e:
       print('[CATCH ERROR]', type(e).__name__, e)
