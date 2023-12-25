@@ -23,7 +23,7 @@ dp = Dispatcher()
 async def cmd_start(message: Message):
    kb = [
       [KeyboardButton(text="Mini App", web_app=WebAppInfo(url='https://bespoke-boba-ec8951.netlify.app'))],
-      [KeyboardButton(text="Сервер на ngrok", web_app=WebAppInfo(url='https://f66f-2a00-1370-817a-51ff-9126-863b-ed58-153c.ngrok-free.app'))] # не статическая ссылка (ngrok)
+      [KeyboardButton(text="Сервер на ngrok", web_app=WebAppInfo(url='https://d20f-2a00-1370-817a-51ff-e131-124-a82-34eb.ngrok-free.app'))] # не статическая ссылка (ngrok)
    ]
    keyboard = ReplyKeyboardMarkup(keyboard=kb)
    await message.answer("Бот работает", reply_markup=keyboard)
@@ -71,19 +71,21 @@ async def cbd_menu_other(callback: CallbackQuery):
    await callback.message.edit_text(text='Вы находитесь в меню', reply_markup=kb_menu_other)
 
 # создание базы данных
-@dp.message(Command('bd'))
-async def cmd_start(message: Message):
+@dp.message(Command('db'))
+async def cmd_db(message: Message):
    db.start()
 
-   db.firstSeen(message.chat.id, 'achievements')
-   db.firstSeen(message.chat.id, 'users_map')
    db.firstSeen(message.chat.id, 'users')
+   db.firstSeen(message.chat.id, 'users_map')
    db.firstSeen(message.chat.id, 'transition_events')
+   db.firstSeen(message.chat.id, 'achievements')
+   db.firstSeen(message.chat.id, 'collections')
+   db.firstSeen(message.chat.id, 'inventories')
 
    await message.answer('Пользователь добавлен в БД')
 
 @dp.message(Command('drop'))
-async def cmd_start(message: Message):
+async def cmd_drop(message: Message):
    db.drop()
    await message.answer('Базы данных удалены')
 

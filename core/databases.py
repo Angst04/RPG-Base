@@ -49,7 +49,7 @@ def start():
                   now_location TEXT DEFAULT 'Эвертон',
                   Copper INTEGER DEFAULT 0,
                   Emberwood INTEGER DEFAULT 0
-                  )''')
+      )''')
 
       cur.execute('''CREATE TABLE IF NOT EXISTS transition_events (
                   id serial PRIMARY KEY,
@@ -57,14 +57,28 @@ def start():
                   last_event INTEGER DEFAULT 0,
                   Западня INTEGER DEFAULT 0,
                   Чертополох INTEGER DEFAULT 0
-                  )''')
+      )''')
 
       cur.execute('''CREATE TABLE IF NOT EXISTS achievements (
                   id serial PRIMARY KEY,
                   id_tg INTEGER,
                   a1 INTEGER DEFAULT 0,
                   a2 INTEGER DEFAULT 0
-                  )''')
+      )''')
+      
+      cur.execute('''CREATE TABLE IF NOT EXISTS inventories (
+                  id serial PRIMARY KEY,
+                  id_tg INTEGER,
+                  card_1 TEXT DEFAULT 'c_0001',
+                  card_2 TEXT DEFAULT 'c_0002',
+                  card_3 TEXT DEFAULT '0',
+                  card_4 TEXT DEFAULT '0',
+                  card_5 TEXT DEFAULT '0',
+                  card_6 TEXT DEFAULT '0',
+                  card_7 TEXT DEFAULT '0',
+                  card_8 TEXT DEFAULT '0',
+                  card_9 TEXT DEFAULT '0'
+      )''')
       
       cur.execute('''CREATE TABLE IF NOT EXISTS collections (
                   id serial PRIMARY KEY,
@@ -73,22 +87,8 @@ def start():
                   c_0002 INTEGER DEFAULT 1,
                   c_0003 INTEGER DEFAULT 0,
                   c_0004 INTEGER DEFAULT 0
-                  )''')
-
-      cur.execute('''CREATE TABLE IF NOT EXISTS inventories (
-                  id serial PRIMARY KEY,
-                  id_tg INTEGER,
-                  card_1 INTEGER DEFAULT c_0001,
-                  card_2 INTEGER DEFAULT c_0002,
-                  card_3 INTEGER DEFAULT 0,
-                  card_4 INTEGER DEFAULT 0,
-                  card_5 INTEGER DEFAULT 0,
-                  card_6 INTEGER DEFAULT 0,
-                  card_7 INTEGER DEFAULT 0,
-                  card_8 INTEGER DEFAULT 0,
-                  card_9 INTEGER DEFAULT 0
-                  )''')
-
+      )''')
+      
    except Exception as e:
       print('[CATCH ERROR]', type(e).__name__, e)
 
@@ -106,12 +106,15 @@ def drop():
       database=db_name
    )
    cur = conn.cursor()
+   conn.autocommit = True
 
    cur.execute(f"DROP TABLE users;")
    cur.execute(f"DROP TABLE users_map;")
    cur.execute(f"DROP TABLE transition_events;")
    cur.execute(f"DROP TABLE achievements;")
+   cur.execute(f"DROP TABLE inventories;")
+   cur.execute(f"DROP TABLE collections;")
 
-   conn.commit()
+   #conn.commit()
    cur.close()
    conn.close()
