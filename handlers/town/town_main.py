@@ -5,9 +5,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 import psycopg2
 from core.dbs_config import host, user, password, db_name
 
-from handlers.town.towns_list.everton import everton_main
-
-from handlers.town.towns_list.everton.everton_main import everton
+from handlers.town.towns_list.everton import everton_quests
 
 router = Router()
 
@@ -25,6 +23,13 @@ async def cbd_town(callback):
    conn.close()
    
    if now_location == 'Эвертон':
-      await everton(callback)
+      builder = InlineKeyboardBuilder()
+      builder.row(InlineKeyboardButton(text='☑️ Ратуша ☑️', callback_data='everton_quests'))
+      builder.row(InlineKeyboardButton(text='Рынок', callback_data='#'))
+   
+      text = 'Перед вами возвышаются стены прекрасного Эвертона'
       
-router.include_routers(everton_main.router)
+   builder.row(InlineKeyboardButton(text='Главное меню', callback_data='menu'))
+   await callback.message.edit_text(text=text, reply_markup=builder.as_markup())
+
+router.include_routers(everton_quests.router)

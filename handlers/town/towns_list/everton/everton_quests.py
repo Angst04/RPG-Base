@@ -5,10 +5,13 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 import psycopg2
 from core.dbs_config import host, user, password, db_name
 
+router = Router()
+
+@router.callback_query(F.data == 'everton_quests')
 async def everton_quests(callback):
    builder = InlineKeyboardBuilder()
    builder.row(InlineKeyboardButton(text='Арнольд', callback_data='quest_arnold'))
    
-   builder.row(InlineKeyboardButton(text='Назад', callback_data='everton_back'))
+   builder.row(InlineKeyboardButton(text='Назад', callback_data='town'))
    
    await callback.message.edit_text(text='В ратуше вы замечаете несколько интересных персон, которые явно что-то хотят от вас', reply_markup=builder.as_markup())
