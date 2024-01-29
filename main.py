@@ -6,7 +6,7 @@ from aiogram.types import Message, CallbackQuery, FSInputFile, ReplyKeyboardMark
 from aiogram.filters.command import Command
 
 
-from handlers import main_menu, ac_desc, webapp
+from handlers import main_menu, webapp
 from storylines import test_storie
 from core.keyboards import kb_menu, kb_menu_other
 import core.databases as db
@@ -41,7 +41,7 @@ async def cmd_menu(message: Message):
          await message.bot.delete_message(chat_id, previous_menu_message_id)
          await message.bot.delete_message(chat_id, previous_menu_message_id - 1)
       except TelegramBadRequest:
-         await message.bot.delete_message(chat_id, previous_menu_message_id)
+         pass
 
    menu_message = await message.answer(reply_markup=kb_menu, text='Вы находитесь в меню')
    menu_message_ids[chat_id] = menu_message.message_id
@@ -100,10 +100,11 @@ async def f(callback: CallbackQuery):
 
 
 async def main():
-   dp.include_routers(main_menu.router, test_storie.router, ac_desc.router, webapp.router)
+   dp.include_routers(main_menu.router, test_storie.router, webapp.router)
 
    # ответ на сообщения, отправленные до включения бота
    # await bot.delete_webhook(drop_pending_updates=True)
+   print('Бот стартовал')
    await dp.start_polling(bot)
 
 if __name__ == "__main__":

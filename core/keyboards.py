@@ -9,6 +9,12 @@ kb_menu = InlineKeyboardMarkup(inline_keyboard=[
    ],
    [
       InlineKeyboardButton(
+         text='Город',
+         callback_data='town'
+      )
+   ],
+   [
+      InlineKeyboardButton(
          text='Дополнительно',
          callback_data='menu_other'
       )
