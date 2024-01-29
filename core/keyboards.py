@@ -15,6 +15,12 @@ kb_menu = InlineKeyboardMarkup(inline_keyboard=[
    ],
    [
       InlineKeyboardButton(
+         text='Мои поручения',
+         callback_data='my_quests'
+      )
+   ],
+   [
+      InlineKeyboardButton(
          text='Дополнительно',
          callback_data='menu_other'
       )

@@ -89,6 +89,17 @@ def start():
                   c_0004 INTEGER DEFAULT 0
       )''')
       
+      cur.execute('''CREATE TABLE IF NOT EXISTS quests (
+                  id serial PRIMARY KEY,
+                  id_tg INTEGER,
+                  p1_1 TEXT DEFAULT 'open',
+                  p1_2 TEXT DEFAULT 'close',
+                  p1_3 TEXT DEFAULT 'close',
+                  p1_4 TEXT DEFAULT 'close',
+                  p2_1 TEXT DEFAULT 'open',
+                  p2_2 TEXT DEFAULT 'close'
+      )''')
+      
    except Exception as e:
       print('[CATCH ERROR]', type(e).__name__, e)
 
@@ -114,7 +125,7 @@ def drop():
    cur.execute(f"DROP TABLE achievements;")
    cur.execute(f"DROP TABLE inventories;")
    cur.execute(f"DROP TABLE collections;")
+   cur.execute(f"DROP TABLE quests;")
 
-   #conn.commit()
    cur.close()
    conn.close()

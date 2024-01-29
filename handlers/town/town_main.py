@@ -5,7 +5,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 import psycopg2
 from core.dbs_config import host, user, password, db_name
 
-from handlers.town.towns_list.everton import everton_quests
+from handlers.town import town_quests
 
 router = Router()
 
@@ -22,14 +22,21 @@ async def cbd_town(callback):
    cur.close()
    conn.close()
    
-   if now_location == 'Эвертон':
-      builder = InlineKeyboardBuilder()
-      builder.row(InlineKeyboardButton(text='☑️ Ратуша ☑️', callback_data='everton_quests'))
-      builder.row(InlineKeyboardButton(text='Рынок', callback_data='#'))
+   builder = InlineKeyboardBuilder()
    
+   if now_location == 'Эвертон':
       text = 'Перед вами возвышаются стены прекрасного Эвертона'
-      
+      name_quests = '☑️ Ратуша ☑️'
+      name_market = 'Рынок'
+   
+   elif now_location == 'имение Чапси':
+      text = 'Вы стоите посреди деревеньки с затхлым запахом'
+      name_quests = '☑️ Доска поручений ☑️'
+      name_market = 'Изба барахольщиков'
+   
+   builder.row(InlineKeyboardButton(text=name_quests, callback_data='quests'))
+   builder.row(InlineKeyboardButton(text=name_market, callback_data='market'))
    builder.row(InlineKeyboardButton(text='Главное меню', callback_data='menu'))
    await callback.message.edit_text(text=text, reply_markup=builder.as_markup())
-
-router.include_routers(everton_quests.router)
+   
+router.include_routers(town_quests.router)

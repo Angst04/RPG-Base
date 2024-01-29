@@ -68,7 +68,7 @@ async def cbd_menu(callback: CallbackQuery):
 
 @dp.callback_query(F.data == 'menu_other')
 async def cbd_menu_other(callback: CallbackQuery):
-   await callback.message.edit_text(text='Вы находитесь в меню', reply_markup=kb_menu_other)
+   await callback.message.edit_text(text='Вы находитесь в дополнительном меню', reply_markup=kb_menu_other)
 
 # создание базы данных
 @dp.message(Command('db'))
@@ -81,6 +81,7 @@ async def cmd_db(message: Message):
    db.firstSeen(message.chat.id, 'achievements')
    db.firstSeen(message.chat.id, 'collections')
    db.firstSeen(message.chat.id, 'inventories')
+   db.firstSeen(message.chat.id, 'quests')
 
    await message.answer('Пользователь добавлен в БД')
 
@@ -104,7 +105,6 @@ async def main():
 
    # ответ на сообщения, отправленные до включения бота
    # await bot.delete_webhook(drop_pending_updates=True)
-   print('Бот стартовал')
    await dp.start_polling(bot)
 
 if __name__ == "__main__":
