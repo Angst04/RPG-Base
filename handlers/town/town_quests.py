@@ -4,8 +4,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import psycopg2
 from core.dbs_config import host, user, password, db_name
-
-from handlers.town.questioners import p1, p2
+from data.quests_desc import quests
 
 router = Router()
 
@@ -27,15 +26,16 @@ async def f(callback: CallbackQuery):
    if now_location == 'Эвертон':
       text = 'Вы заходите в ратушу'
       
-      cur.execute(f"SELECT 'open' FROM quests WHERE id_tg = %s AND ('open' IN (p1_1, p1_2, p1_3, p1_4))", [callback.message.chat.id])
-      if cur.fetchone():
-         builder.row(InlineKeyboardButton(text='Арнольд', callback_data='p1'))
-         flag = True
-
-      cur.execute(f"SELECT 'open' FROM quests WHERE id_tg = %s AND ('open' IN (p2_1, p2_2))", [callback.message.chat.id])
-      if cur.fetchone():
-         builder.row(InlineKeyboardButton(text='Бади', callback_data='p2'))
-         flag = True
+      for index, quest in enumerate(quests[:4], start=1):
+         cur.execute(f"SELECT q_{index} FROM quests WHERE id_tg = %s", [callback.message.chat.id])
+         res = cur.fetchone()[0]
+         if res == 'open':
+            flag = True
+            builder.row(InlineKeyboardButton(text=quest['name'], callback_data=f'q_{index}_info'))
+         elif res == 'active':
+            flag = True
+            builder.row(InlineKeyboardButton(text=f"{quest['name']} ☑️", callback_data=f'q_{index}_info'))
+         
 
    cur.close()
    conn.close()
@@ -43,7 +43,5 @@ async def f(callback: CallbackQuery):
 
    if not flag:
       text = 'Сейчас поручений нет'
-   else:
-      await callback.message.edit_text(text=text, reply_markup=builder.as_markup())
-
-router.include_routers(p1.router, p2.router)
+      
+   await callback.message.edit_text(text=text, reply_markup=builder.as_markup())
