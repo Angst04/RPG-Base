@@ -4,6 +4,7 @@ from aiogram.types import CallbackQuery
 from handlers.map import map_main, map_environs
 from handlers.achievements import ac_desc
 from handlers.town import town_main
+from handlers import my_quests
 
 from handlers.town.town_main import cbd_town
 from handlers.map.map_environs import cbd_environs
@@ -33,4 +34,4 @@ async def f(callback: CallbackQuery):
 async def f(callback: CallbackQuery):
    await cbd_quests(callback)
 
-router.include_routers(map_main.router, map_environs.router, ac_desc.router, town_main.router)
+router.include_routers(map_main.router, map_environs.router, ac_desc.router, town_main.router, my_quests.router)
