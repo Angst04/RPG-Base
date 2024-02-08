@@ -32,7 +32,7 @@ async def cbd_quests(callback):
    cur.close()
    conn.close()
    
-   builder.row(InlineKeyboardButton(text='Назад', callback_data='menu'))
+   builder.row(InlineKeyboardButton(text='Главное меню', callback_data='menu'))
 
    if flag:
       text = 'Список ваших поручений:'

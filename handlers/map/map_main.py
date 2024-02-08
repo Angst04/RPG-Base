@@ -175,6 +175,7 @@ async def cancelTransition(callback: CallbackQuery):
    builder.row(InlineKeyboardButton(text='Вернуться к карте', callback_data='map'))
 
    await callback.message.delete()
+   await sleep(0.75)
    await callback.message.answer(text='Путешествие отменено', reply_markup=builder.as_markup())
 
 

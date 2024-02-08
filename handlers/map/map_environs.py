@@ -4,7 +4,7 @@ from aiogram.types import CallbackQuery, ReplyKeyboardRemove, InlineKeyboardMark
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import psycopg2
-from asyncio import create_task
+from asyncio import create_task, sleep
 from core.dbs_config import host, user, password, db_name
 from .map_main import transition, cancel_event
 
@@ -40,6 +40,7 @@ async def cbd_environs(callback):
 
    if flag:
       await callback.message.delete()
+      await sleep(0.75)
       await callback.message.answer_photo(photo=photo, caption='Посморим-ка на окрестности... Куда отправимся?', reply_markup=builder.as_markup())
    else:
       await callback.message.edit_caption(caption='В окрестностях ничего нет', reply_markup=builder.as_markup())

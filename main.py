@@ -1,9 +1,11 @@
 import asyncio
+from asyncio import sleep
 import logging
 from aiogram.exceptions import TelegramBadRequest
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message, CallbackQuery, FSInputFile, ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
+from aiogram.types import Message, CallbackQuery, FSInputFile, ReplyKeyboardMarkup, KeyboardButton, WebAppInfo, InlineKeyboardButton
 from aiogram.filters.command import Command
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
 from handlers import main_menu, webapp
@@ -18,15 +20,6 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=config.TOKEN)
 dp = Dispatcher()
 
-
-@dp.message(Command('start'))
-async def cmd_start(message: Message):
-   kb = [
-      [KeyboardButton(text="Mini App", web_app=WebAppInfo(url='https://bespoke-boba-ec8951.netlify.app'))],
-      [KeyboardButton(text="Сервер на ngrok", web_app=WebAppInfo(url='https://d20f-2a00-1370-817a-51ff-e131-124-a82-34eb.ngrok-free.app'))] # не статическая ссылка (ngrok)
-   ]
-   keyboard = ReplyKeyboardMarkup(keyboard=kb)
-   await message.answer("Бот работает", reply_markup=keyboard)
 
 # главное меню
 menu_message_ids = {} # нужно перенести в бд !
@@ -43,26 +36,29 @@ async def cmd_menu(message: Message):
       except TelegramBadRequest:
          pass
 
-   menu_message = await message.answer(reply_markup=kb_menu, text='Вы находитесь в меню')
+   menu_message = await message.answer(reply_markup=kb_menu(chat_id), text='Вы находитесь в меню')
    menu_message_ids[chat_id] = menu_message.message_id
 
    await message.bot.pin_chat_message(chat_id, menu_message.message_id)
 
 @dp.callback_query(F.data == 'menu')
 async def cbd_menu(callback: CallbackQuery):
+   chat_id =callback.message.chat.id
    need_pin = True
    try:
-      menu_message = await callback.message.edit_text(text='Вы находитесь в меню', reply_markup=kb_menu)
+      menu_message = await callback.message.edit_text(text='Вы находитесь в меню', reply_markup=kb_menu(chat_id))
       need_pin = False
    except TelegramBadRequest:
       try:
          await callback.message.delete()
       except TelegramBadRequest:
          pass
-      menu_message = await callback.message.answer(text='Вы находитесь в меню', reply_markup=kb_menu)
+      await sleep(0.75)
+      menu_message = await callback.message.answer(text='Вы находитесь в меню', reply_markup=kb_menu(chat_id))
    menu_message_ids[callback.message.chat.id] = menu_message.message_id
 
    if need_pin:
+      await sleep(1)
       await callback.message.bot.pin_chat_message(callback.message.chat.id, menu_message.message_id)
 
 
