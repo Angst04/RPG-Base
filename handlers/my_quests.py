@@ -20,4 +20,6 @@ async def cbd_quests(callback):
    
    builder = InlineKeyboardBuilder()
    
+   builder.row(InlineKeyboardButton(text='Назад', callback_data='menu'))
+   
    await callback.message.edit_text(text='Список ваших поручений:', reply_markup=builder.as_markup())
