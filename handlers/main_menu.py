@@ -11,6 +11,7 @@ from handlers.map.map_environs import cbd_environs
 from handlers.map.map_main import cbd_map
 from handlers.achievements.ac_main import cbd_achievements
 from handlers.my_quests import cbd_quests
+from handlers import info_click
 
 router = Router()
 
@@ -34,4 +35,4 @@ async def f(callback: CallbackQuery):
 async def f(callback: CallbackQuery):
    await cbd_quests(callback)
 
-router.include_routers(map_main.router, map_environs.router, ac_desc.router, town_main.router, my_quests.router)
+router.include_routers(map_main.router, map_environs.router, ac_desc.router, town_main.router, my_quests.router, info_click.router)

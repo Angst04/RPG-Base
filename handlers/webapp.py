@@ -46,4 +46,4 @@ async def send_card(message, cardID):
       await message.answer_photo(photo=image, caption=title)
    else:
       await message.answer('Ошибка при выборе карты')
-      print('[ERROR] Карта не найдена')
+      print('[ERROR] Карта выбранная пользователем не найдена')

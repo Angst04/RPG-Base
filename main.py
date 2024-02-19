@@ -3,15 +3,15 @@ from asyncio import sleep
 import logging
 from aiogram.exceptions import TelegramBadRequest
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message, CallbackQuery, FSInputFile, ReplyKeyboardMarkup, KeyboardButton, WebAppInfo, InlineKeyboardButton
+from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.filters.command import Command
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
 from handlers import main_menu, webapp
 from storylines import test_storie
 from core.keyboards import kb_menu, kb_menu_other
 import core.databases as db
+from apps.battle import battle_main
 import config
 
 
@@ -33,17 +33,19 @@ async def cmd_menu(message: Message):
       try:
          await message.bot.delete_message(chat_id, previous_menu_message_id)
          await message.bot.delete_message(chat_id, previous_menu_message_id - 1)
+         await sleep(0.75)
       except TelegramBadRequest:
          pass
 
    menu_message = await message.answer(reply_markup=kb_menu(chat_id), text='Вы находитесь в меню')
    menu_message_ids[chat_id] = menu_message.message_id
 
+   await sleep(1)
    await message.bot.pin_chat_message(chat_id, menu_message.message_id)
 
 @dp.callback_query(F.data == 'menu')
 async def cbd_menu(callback: CallbackQuery):
-   chat_id =callback.message.chat.id
+   chat_id = callback.message.chat.id
    need_pin = True
    try:
       menu_message = await callback.message.edit_text(text='Вы находитесь в меню', reply_markup=kb_menu(chat_id))
@@ -97,7 +99,7 @@ async def f(callback: CallbackQuery):
 
 
 async def main():
-   dp.include_routers(main_menu.router, test_storie.router, webapp.router)
+   dp.include_routers(main_menu.router, test_storie.router, webapp.router, battle_main.router)
 
    # ответ на сообщения, отправленные до включения бота
    # await bot.delete_webhook(drop_pending_updates=True)

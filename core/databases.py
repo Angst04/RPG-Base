@@ -40,7 +40,9 @@ def start():
       cur.execute('''CREATE TABLE IF NOT EXISTS users (
                   id serial PRIMARY KEY,
                   id_tg INTEGER,
-                  speed INTEGER DEFAULT 5
+                  speed INTEGER DEFAULT 5,
+                  health INTEGER DEFAULT 10,
+                  enemy_health INTEGER DEFAULT 0
       )''')
 
       cur.execute('''CREATE TABLE IF NOT EXISTS users_map (
@@ -107,7 +109,7 @@ def start():
       if conn:
          cur.close()
          conn.close()
-         print('[INFO] Соединение с БД закрыто')
+         print('[INFO] БД создана')
 
 def drop():
    conn = psycopg2.connect(

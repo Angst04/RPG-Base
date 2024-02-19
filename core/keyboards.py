@@ -5,7 +5,7 @@ import psycopg2
 from core.dbs_config import host, user, password, db_name
 
 
-enemy_loc = ['лесопилка Доппи', 'Амбербрук']
+enemy_loc = ['лесопилка Доппи', 'Амбербрук', 'Эвертон']
 town_loc = ['Эвертон']
 
 def kb_menu(chat_id):
