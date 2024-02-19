@@ -40,7 +40,7 @@ async def battle_prepare(callback, text, photo, amount):
    
    builder_2.row(InlineKeyboardButton(text='Выбрать карту', callback_data='test_attack'))
    
-   await sleep(0.75)
+   await sleep(0.3)
    await callback.message.answer(text='Информация о вашем герое', reply_markup=builder_2.as_markup())
    
    
@@ -48,7 +48,7 @@ async def edit_health(callback, amount):
    builder = InlineKeyboardBuilder()
    await health_ind(amount=amount, builder=builder)
    
-   await callback.message.edit_text(text='', inline_message_id=str(callback.message.message_id - 1), reply_markup=builder.as_markup())
+   await callback.message.bot.edit_message_reply_markup(chat_id=callback.message.chat.id, message_id=callback.message.message_id - 1, reply_markup=builder.as_markup())
 
    
 @router.callback_query(F.data == 'test_attack')
@@ -66,7 +66,7 @@ async def f(callback: CallbackQuery):
    enemy_health -= 5
    if enemy_health <= 0:
       builder = InlineKeyboardBuilder()
-      builder.row(InlineKeyboardButton(text='Вернуться в меню', callback_data='menu'))
+      builder.row(InlineKeyboardButton(text='Забрать добычу', callback_data='menu'))
       
       cur.execute(f'UPDATE users SET enemy_health = 0 WHERE id_tg=%s', [callback.message.chat.id])
       conn.commit()
@@ -74,7 +74,7 @@ async def f(callback: CallbackQuery):
       await callback.message.bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id - 1)
       await sleep(0.75)
       await callback.message.bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
-      await sleep(0.75)
+      await sleep(1)
       await callback.message.answer(text='Враг повержен', reply_markup=builder.as_markup())
    else:
       cur.execute(f'UPDATE users SET enemy_health = %s WHERE id_tg=%s', [enemy_health, callback.message.chat.id])
