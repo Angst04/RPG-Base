@@ -3,7 +3,9 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-import sqlite3
+import psycopg2
+from core.dbs_config import host, user, password, db_name
+
 from time import sleep
 
 router = Router()
@@ -33,16 +35,20 @@ async def test_msg_2(callback: CallbackQuery):
 
 @router.callback_query(F.data == 'test_msg_3')
 async def test_msg_2(callback: CallbackQuery):
-   # await callback.answer(text='Ждём...')
-   # await callback.answer(text='Вы повернули налево', show_alert=True)
-
-   conn = sqlite3.connect('Base/data/achievements.sql', check_same_thread=False)
+   conn = psycopg2.connect(
+      host=host,
+      user=user,
+      password=password,
+      database=db_name
+   )
    cur = conn.cursor()
 
-   if conn.execute(f'SELECT a1 FROM achievements WHERE id_tg = {callback.message.chat.id}').fetchone()[0] != 1:
+   cur.execute(f'SELECT a1 FROM achievements WHERE id_tg = %s', [callback.message.chat.id])
+   if cur.fetchone() != 1:
       await callback.answer(text='Получено достижение!', show_alert=True)
 
-   cur.execute('UPDATE achievements SET a1 = 1 WHERE id_tg=?', (callback.message.chat.id,))
+   cur.execute(f'UPDATE achievements SET a1 = 1 WHERE id_tg=%s', [callback.message.chat.id])
+
    conn.commit()
    cur.close()
    conn.close()

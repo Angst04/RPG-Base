@@ -1,25 +1,36 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-kb_menu = InlineKeyboardMarkup(inline_keyboard=[
-   [
-      InlineKeyboardButton(
-         text='Карта',
-         callback_data='map'
-      )
-   ],
-   [
-      InlineKeyboardButton(
-         text='Колекция',
-         web_app=WebAppInfo(url='https://angst04.github.io/RPG-Mini-Apps/')
-      )
-   ],
-   [
-      InlineKeyboardButton(
-         text='Дополнительно',
-         callback_data='menu_other'
-      )
-   ]
-])
+import psycopg2
+from core.dbs_config import host, user, password, db_name
+
+
+enemy_loc = ['лесопилка Доппи', 'Амбербрук', 'Эвертон']
+town_loc = ['Эвертон']
+
+def kb_menu(chat_id):
+   conn = psycopg2.connect(
+      host=host,
+      user=user,
+      password=password,
+      database=db_name
+   )
+   cur = conn.cursor()
+   cur.execute(f'SELECT now_location FROM users_map WHERE id_tg = %s', [chat_id])
+   now_location = cur.fetchone()[0]
+   cur.close()
+   conn.close()
+   
+   builder = InlineKeyboardBuilder()
+   builder.row(InlineKeyboardButton(text='Карта', callback_data='map'))
+   if now_location in town_loc:
+      builder.row(InlineKeyboardButton(text='Город', callback_data='town'))
+   if now_location in enemy_loc:
+      builder.row(InlineKeyboardButton(text='Поиск противника', callback_data='find_enemy'))
+   builder.row(InlineKeyboardButton(text='Мои поручения', callback_data='my_quests'))
+   builder.row(InlineKeyboardButton(text='Дополнительно', callback_data='menu_other'))
+   
+   return builder.as_markup()
 
 kb_menu_other = InlineKeyboardMarkup(inline_keyboard=[
    [

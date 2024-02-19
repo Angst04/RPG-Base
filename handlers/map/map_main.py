@@ -4,7 +4,9 @@ import aiogram
 from aiogram.types import CallbackQuery, InlineKeyboardButton, FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-import sqlite3
+import psycopg2
+from core.dbs_config import host, user, password, db_name
+
 from random import randint
 from math import ceil
 from apps.transition_events.events_main import transitionEvent
@@ -14,13 +16,83 @@ router = Router()
 
 cancel_event = Event()
 
+async def cbd_map(callback):
+   conn = psycopg2.connect(
+      host=host,
+      user=user,
+      password=password,
+      database=db_name
+   )
+   cur = conn.cursor()
+   cur.execute(f'SELECT now_location FROM users_map WHERE id_tg = %s', [callback.message.chat.id])
+   now_location = cur.fetchone()[0]
+
+   builder = InlineKeyboardBuilder()
+   builder.row(InlineKeyboardButton(text=f'{now_location.title()} <- вы здесь', callback_data='#'))
+
+   if now_location == 'Эвертон':
+      photo = FSInputFile('Base/data/images/map_tiles/everton.jpg')
+
+      builder.row(InlineKeyboardButton(text='Имение Чапси', callback_data='имение Чапси'))
+      builder.row(InlineKeyboardButton(text='Амбербрук', callback_data='Амбербрук'))
+   elif now_location == 'Амбербрук':
+      photo = FSInputFile('Base/data/images/map_tiles/everton.jpg')
+
+      builder.row(InlineKeyboardButton(text='Эвертон', callback_data='Эвертон'))
+      cur.execute(f'SELECT Copper FROM users_map WHERE id_tg = %s', [callback.message.chat.id])
+      if cur.fetchone()[0] == 1:
+         builder.row(InlineKeyboardButton(text='Коппер', callback_data='Коппер'))
+   elif now_location == 'имение Чапси':
+      photo = FSInputFile('Base/data/images/map_tiles/everton.jpg')
+
+      builder.row(InlineKeyboardButton(text='Эвертон', callback_data='Эвертон'))
+      cur.execute(f'SELECT Emberwood FROM users_map WHERE id_tg = %s', [callback.message.chat.id])
+      if cur.fetchone()[0] == 1:
+         builder.row(InlineKeyboardButton(text='Эмбервуд', callback_data='Эмбервуд'))
+
+   # Окрестности
+   elif now_location == 'лесопилка Доппи':
+      photo = FSInputFile('Base/data/images/map_tiles/environs/everton_environs.jpg') # нужно заменить фотки
+   elif now_location == 'тестовая локация':
+      photo = FSInputFile('Base/data/images/map_tiles/environs/amberbrook_environs.jpg')
+
+   else:
+      photo = FSInputFile('Base/data/images/white.png')
+
+   cur.close()
+   conn.close()
+
+   if now_location not in ['лесопилка Доппи', 'тестовая локация']:
+      builder.row(InlineKeyboardButton(text='Окрестности', callback_data='environs'))
+   else:
+      if now_location in ['лесопилка Доппи']:
+         cb_city = 'Эвертон' # можно посмотреть в map_environs
+      elif now_location in ['тестовая локация']:
+         cb_city = 'Амбербрук'
+      builder.row(InlineKeyboardButton(text='Покинуть окрестности', callback_data=cb_city))
+      
+   builder.row(InlineKeyboardButton(text='Назад', callback_data='menu'))
+
+   await callback.message.delete()
+   await sleep(0.75)
+   await callback.message.answer_photo(photo=photo, caption='Вы открываете карту. Куда отправимся?', reply_markup=builder.as_markup())
+
 async def transition(callback, distance, name, type='city', subname=None):
    await callback.answer('Движемся...')
    builder = InlineKeyboardBuilder()
    builder.row(InlineKeyboardButton(text='Отменить путешествие', callback_data='transition_cancel'))
 
-   conn = sqlite3.connect('Base/data/users.sql', check_same_thread=False)
-   speed = conn.execute(f'SELECT speed FROM users WHERE id_tg = {callback.message.chat.id}').fetchone()[0]
+   conn = psycopg2.connect(
+      host=host,
+      user=user,
+      password=password,
+      database=db_name
+   )
+   cur = conn.cursor()
+
+   cur.execute(f'SELECT speed FROM users WHERE id_tg = %s', [callback.message.chat.id])
+   speed = cur.fetchone()[0]
+   cur.close()
    conn.close()
 
    time = distance / speed * 60
@@ -60,12 +132,18 @@ async def transition(callback, distance, name, type='city', subname=None):
       await sleep(1)
    
    if flag_transiton:
-      conn = sqlite3.connect('Base/data/users_map.sql', check_same_thread=False)
+      conn = psycopg2.connect(
+         host=host,
+         user=user,
+         password=password,
+         database=db_name
+      )
       cur = conn.cursor()
+
       if type == 'city':
-         cur.execute('UPDATE users_map SET now_location = ? WHERE id_tg=?', (name, callback.message.chat.id,))
+         cur.execute(f'UPDATE users_map SET now_location = %s WHERE id_tg=%s', [name, callback.message.chat.id,])
       else:
-         cur.execute('UPDATE users_map SET now_location = ? WHERE id_tg=?', (subname, callback.message.chat.id,))
+         cur.execute(f'UPDATE users_map SET now_location = %s WHERE id_tg=%s', [subname, callback.message.chat.id,])
 
       builder = InlineKeyboardBuilder()
       if type == 'city':
@@ -97,6 +175,7 @@ async def cancelTransition(callback: CallbackQuery):
    builder.row(InlineKeyboardButton(text='Вернуться к карте', callback_data='map'))
 
    await callback.message.delete()
+   await sleep(0.75)
    await callback.message.answer(text='Путешествие отменено', reply_markup=builder.as_markup())
 
 
