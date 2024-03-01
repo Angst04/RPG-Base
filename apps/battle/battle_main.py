@@ -1,7 +1,7 @@
 from asyncio import sleep
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
-from aiogram.types import Message, CallbackQuery, InlineKeyboardButton
+from aiogram.types import CallbackQuery, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import psycopg2
@@ -9,6 +9,7 @@ from core.dbs_config import host, user, password, db_name
 
 from apps.battle.enemies import enemy_1, enemy_2
 from apps.battle import battle_func
+from core.busy_change import busy_change
 
 from random import choice
 
@@ -42,6 +43,7 @@ async def f(callback: CallbackQuery):
 
 @router.callback_query(F.data == 'battle_everton')
 async def f(callback: CallbackQuery):
+   await busy_change(chat_id=callback.message.chat.id, status=True)
    enemies = [
       'Лихорадочный',
       'Ворох'

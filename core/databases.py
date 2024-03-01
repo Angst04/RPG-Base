@@ -42,6 +42,7 @@ def start():
                   id_tg INTEGER,
                   speed INTEGER DEFAULT 5,
                   health INTEGER DEFAULT 10,
+                  busy INTEGER DEFAULT 0,
                   enemy_health INTEGER DEFAULT 0
       )''')
 

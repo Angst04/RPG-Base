@@ -14,6 +14,8 @@ import core.databases as db
 from apps.battle import battle_main
 import config
 
+import psycopg2
+from core.dbs_config import host, user, password, db_name
 
 # логирование
 logging.basicConfig(level=logging.INFO)
@@ -25,6 +27,18 @@ dp = Dispatcher()
 menu_message_ids = {} # нужно перенести в бд !
 @dp.message(Command('menu'))
 async def cmd_menu(message: Message):
+   conn = psycopg2.connect(
+      host=host,
+      user=user,
+      password=password,
+      database=db_name
+   )
+   cur = conn.cursor()
+   cur.execute(f'SELECT busy FROM users WHERE id_tg=%s', [message.chat.id])
+   if cur.fetchone()[0] == 1:
+      # должно всплывать "не сейчас"
+      return
+   
    chat_id = message.chat.id
    # media = FSInputFile('Base/data/images/black.png')
 
