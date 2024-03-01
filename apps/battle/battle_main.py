@@ -1,7 +1,7 @@
 from asyncio import sleep
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
-from aiogram.types import Message, CallbackQuery, FSInputFile, ReplyKeyboardMarkup, KeyboardButton, WebAppInfo, InlineKeyboardButton
+from aiogram.types import Message, CallbackQuery, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import psycopg2
@@ -17,9 +17,7 @@ router = Router()
 @router.callback_query(F.data == 'find_enemy')
 async def f(callback: CallbackQuery):
    builder = InlineKeyboardBuilder()
-   
-   builder.row(InlineKeyboardButton(text='Отмена', callback_data='menu'))
-   
+      
    conn = psycopg2.connect(
       host=host,
       user=user,
@@ -37,6 +35,7 @@ async def f(callback: CallbackQuery):
    elif now_location == 'Амбербрук':
       cbd = 'battle_amberbrook'
    builder.row(InlineKeyboardButton(text='В бой!', callback_data=cbd))
+   builder.row(InlineKeyboardButton(text='Отмена', callback_data='menu'))
    
    await callback.message.edit_text(text='Противник найден', reply_markup=builder.as_markup())
 
