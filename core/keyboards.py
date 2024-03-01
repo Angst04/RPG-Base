@@ -47,6 +47,12 @@ kb_menu_other = InlineKeyboardMarkup(inline_keyboard=[
    ],
    [
       InlineKeyboardButton(
+         text='Фрагменты',
+         callback_data='fragments'
+      )
+   ],
+   [
+      InlineKeyboardButton(
          text='Главное меню',
          callback_data='menu'
       )

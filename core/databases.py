@@ -88,7 +88,8 @@ def start():
                   c_0001 INTEGER DEFAULT 1,
                   c_0002 INTEGER DEFAULT 1,
                   c_0003 INTEGER DEFAULT 0,
-                  c_0004 INTEGER DEFAULT 0
+                  c_0004 INTEGER DEFAULT 0,
+                  c_0005 INTEGER DEFAULT 0
       )''')
       
       cur.execute('''CREATE TABLE IF NOT EXISTS quests (
@@ -100,6 +101,14 @@ def start():
                   q_4 TEXT DEFAULT 'close',
                   q_5 TEXT DEFAULT 'open',
                   q_6 TEXT DEFAULT 'close'
+      )''')
+      
+      cur.execute('''CREATE TABLE IF NOT EXISTS fragments (
+                  id serial PRIMARY KEY,
+                  id_tg INTEGER,
+                  "Ярость бури" INTEGER DEFAULT 0,
+                  "Вознесение" INTEGER DEFAULT 0,
+                  "Скрытый талант" INTEGER DEFAULT -1
       )''')
       
    except Exception as e:
@@ -128,6 +137,7 @@ def drop():
    cur.execute(f"DROP TABLE inventories;")
    cur.execute(f"DROP TABLE collections;")
    cur.execute(f"DROP TABLE quests;")
+   cur.execute(f"DROP TABLE fragments;")
 
    cur.close()
    conn.close()

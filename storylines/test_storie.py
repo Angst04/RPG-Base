@@ -8,6 +8,8 @@ from core.dbs_config import host, user, password, db_name
 
 from time import sleep
 
+from handlers.fragments import raise_fragment
+
 router = Router()
 
 @router.callback_query(F.data == 'test_msg_1')
@@ -29,8 +31,8 @@ async def test_msg_2(callback: CallbackQuery):
 
    builder = InlineKeyboardBuilder()
    builder.adjust(2)
-   builder.add(InlineKeyboardButton(text='Налево', callback_data='test_msg_3'))
-   builder.add(InlineKeyboardButton(text='Направо', callback_data='test_msg_4'))
+   builder.add(InlineKeyboardButton(text='Получить достижение', callback_data='test_msg_3'))
+   builder.add(InlineKeyboardButton(text='Получить фрагмент', callback_data='test_msg_4'))
    await callback.message.answer(text='Куда пойдём?', reply_markup=builder.as_markup())
 
 @router.callback_query(F.data == 'test_msg_3')
@@ -57,6 +59,4 @@ async def test_msg_2(callback: CallbackQuery):
 
 @router.callback_query(F.data == 'test_msg_4')
 async def test_msg_2(callback: CallbackQuery):
-   await callback.answer(text='Ждём...')
-   sleep(1)
-   await callback.answer(text='Вы в лесу', show_alert=True)
+   await raise_fragment(callback=callback, name='Ярость бури')

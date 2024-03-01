@@ -73,6 +73,7 @@ async def cbd_menu_other(callback: CallbackQuery):
 async def cmd_db(message: Message):
    db.start()
 
+   # при первом добавлении таблицы не вписывать сюда
    db.firstSeen(message.chat.id, 'users')
    db.firstSeen(message.chat.id, 'users_map')
    db.firstSeen(message.chat.id, 'transition_events')
@@ -80,6 +81,7 @@ async def cmd_db(message: Message):
    db.firstSeen(message.chat.id, 'collections')
    db.firstSeen(message.chat.id, 'inventories')
    db.firstSeen(message.chat.id, 'quests')
+   db.firstSeen(message.chat.id, 'fragments')
 
    await message.answer('Пользователь добавлен в БД')
 
