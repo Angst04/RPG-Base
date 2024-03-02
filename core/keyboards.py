@@ -41,6 +41,12 @@ kb_menu_other = InlineKeyboardMarkup(inline_keyboard=[
    ],
    [
       InlineKeyboardButton(
+         text='Персонаж',
+         callback_data='hero'
+      )
+   ],
+   [
+      InlineKeyboardButton(
          text='Достижения',
          callback_data='achievements'
       )

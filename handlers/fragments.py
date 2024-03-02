@@ -1,5 +1,4 @@
-from aiogram import Router, F
-from aiogram.types import CallbackQuery, InlineKeyboardButton, FSInputFile
+from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import psycopg2

@@ -13,6 +13,7 @@ from handlers.achievements.ac_main import cbd_achievements
 from handlers.my_quests import cbd_quests
 from handlers import info_click
 from handlers.fragments import cbd_fragments
+from handlers.hero import cbd_hero
 
 router = Router()
 
@@ -39,5 +40,9 @@ async def f(callback: CallbackQuery):
 @router.callback_query(F.data == 'fragments')
 async def f(callback: CallbackQuery):
    await cbd_fragments(callback)
+   
+@router.callback_query(F.data == 'hero')
+async def f(callback: CallbackQuery):
+   await cbd_hero(callback)
 
 router.include_routers(map_main.router, map_environs.router, ac_desc.router, town_main.router, my_quests.router, info_click.router)
