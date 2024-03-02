@@ -1,10 +1,14 @@
 import asyncio
-from asyncio import sleep
+from asyncio import sleep, Lock
 import logging
 from aiogram.exceptions import TelegramBadRequest
 from aiogram import Bot, Dispatcher, F
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, FSInputFile
+from aiogram.filters.state import State, StatesGroup, StateFilter
 from aiogram.filters.command import Command
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.types import InlineKeyboardButton
 
 
 from handlers import main_menu, webapp
@@ -23,6 +27,60 @@ bot = Bot(token=config.TOKEN)
 dp = Dispatcher()
 
 
+lock = Lock()
+
+class RegisterMessages(StatesGroup):
+   name = State()
+
+@dp.message(StateFilter(None), Command("start"))
+async def cmd_menu(message: Message, state: FSMContext):
+   conn = psycopg2.connect(
+         host=host,
+         user=user,
+         password=password,
+         database=db_name
+      )
+   cur = conn.cursor()
+   
+   cur.execute(f'SELECT name FROM users WHERE id_tg=%s', [message.chat.id])
+   if cur.fetchone()[0] != '0':
+      await message.answer('Вы уже проходили регистрацию. Изменить имя можно в другом месте')
+      await sleep(5)
+      await message.bot.delete_messages(message.chat.id, [message.message_id + 1, message.message_id])
+
+   else:
+      await message.answer('Привет странник! Как тебя зовут?')
+      await state.set_state(RegisterMessages.name)
+   
+@dp.message(F.text, RegisterMessages.name)
+async def reg_step1(message: Message, state: FSMContext):
+   # нужно написать фильтр на имена
+   if message.text == 'Justifall':
+      conn = psycopg2.connect(
+         host=host,
+         user=user,
+         password=password,
+         database=db_name
+      )
+      cur = conn.cursor()
+      cur.execute(f'UPDATE users SET name = %s WHERE id_tg=%s', [message.text, message.chat.id])
+      conn.commit()
+      cur.close()
+      conn.close()
+      
+      await message.answer('Так и запишем...')
+      await state.clear()
+      await sleep(1.5)
+      
+      builder = InlineKeyboardBuilder()
+      builder.row(InlineKeyboardButton(text='Перейти в меню', callback_data='menu'))
+      
+      await message.answer(text='Теперь вы готовы отправиться в грандиозное приключение!', reply_markup=builder.as_markup())
+      await sleep(1.5)
+      await message.bot.delete_messages(message.chat.id, [message.message_id + 1, message.message_id, message.message_id - 1, message.message_id - 2])
+   else:
+      await message.answer('Это имя занято, введите другое')
+
 # главное меню
 menu_message_ids = {} # нужно перенести в бд !
 @dp.message(Command('menu'))
@@ -40,13 +98,11 @@ async def cmd_menu(message: Message):
       return
    
    chat_id = message.chat.id
-   # media = FSInputFile('Base/data/images/black.png')
 
    if chat_id in menu_message_ids:
-      previous_menu_message_id = menu_message_ids[chat_id]
+      prev_menu_id = menu_message_ids[chat_id]
       try:
-         await message.bot.delete_message(chat_id, previous_menu_message_id)
-         await message.bot.delete_message(chat_id, previous_menu_message_id - 1)
+         await message.bot.delete_messages(chat_id, [prev_menu_id, prev_menu_id - 1])
          await sleep(0.75)
       except TelegramBadRequest:
          pass
@@ -54,16 +110,16 @@ async def cmd_menu(message: Message):
    menu_message = await message.answer(reply_markup=kb_menu(chat_id), text='Вы находитесь в меню')
    menu_message_ids[chat_id] = menu_message.message_id
 
-   await sleep(1)
-   await message.bot.pin_chat_message(chat_id, menu_message.message_id)
+   # await sleep(1)
+   # await message.bot.pin_chat_message(chat_id, menu_message.message_id)
 
 @dp.callback_query(F.data == 'menu')
 async def cbd_menu(callback: CallbackQuery):
    chat_id = callback.message.chat.id
-   need_pin = True
+   # need_pin = True
    try:
       menu_message = await callback.message.edit_text(text='Вы находитесь в меню', reply_markup=kb_menu(chat_id))
-      need_pin = False
+      # need_pin = False
    except TelegramBadRequest:
       try:
          await callback.message.delete()
@@ -73,9 +129,9 @@ async def cbd_menu(callback: CallbackQuery):
       menu_message = await callback.message.answer(text='Вы находитесь в меню', reply_markup=kb_menu(chat_id))
    menu_message_ids[callback.message.chat.id] = menu_message.message_id
 
-   if need_pin:
-      await sleep(1)
-      await callback.message.bot.pin_chat_message(callback.message.chat.id, menu_message.message_id)
+   # if need_pin:
+   #    await sleep(1)
+   #    await callback.message.bot.pin_chat_message(callback.message.chat.id, menu_message.message_id)
 
 
 @dp.callback_query(F.data == 'menu_other')
