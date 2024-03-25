@@ -1,5 +1,5 @@
 import asyncio
-from asyncio import sleep, Lock
+from asyncio import sleep
 import logging
 from aiogram.exceptions import TelegramBadRequest
 from aiogram import Bot, Dispatcher, F
@@ -27,13 +27,23 @@ bot = Bot(token=config.TOKEN)
 dp = Dispatcher()
 
 
-lock = Lock()
-
 class RegisterMessages(StatesGroup):
    name = State()
 
 @dp.message(StateFilter(None), Command("start"))
 async def cmd_menu(message: Message, state: FSMContext):
+   db.start() # нужно будет убрать отсюда
+
+   # при первом добавлении таблицы не вписывать сюда
+   db.firstSeen(message.chat.id, 'users')
+   db.firstSeen(message.chat.id, 'users_map')
+   db.firstSeen(message.chat.id, 'transition_events')
+   db.firstSeen(message.chat.id, 'achievements')
+   db.firstSeen(message.chat.id, 'collections')
+   db.firstSeen(message.chat.id, 'inventories')
+   db.firstSeen(message.chat.id, 'quests')
+   db.firstSeen(message.chat.id, 'fragments')
+   
    conn = psycopg2.connect(
          host=host,
          user=user,
@@ -142,17 +152,6 @@ async def cbd_menu_other(callback: CallbackQuery):
 @dp.message(Command('db'))
 async def cmd_db(message: Message):
    db.start()
-
-   # при первом добавлении таблицы не вписывать сюда
-   db.firstSeen(message.chat.id, 'users')
-   db.firstSeen(message.chat.id, 'users_map')
-   db.firstSeen(message.chat.id, 'transition_events')
-   db.firstSeen(message.chat.id, 'achievements')
-   db.firstSeen(message.chat.id, 'collections')
-   db.firstSeen(message.chat.id, 'inventories')
-   db.firstSeen(message.chat.id, 'quests')
-   db.firstSeen(message.chat.id, 'fragments')
-
    await message.answer('Пользователь добавлен в БД')
 
 @dp.message(Command('drop'))
