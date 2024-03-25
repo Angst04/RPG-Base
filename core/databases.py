@@ -40,7 +40,7 @@ def start():
       cur.execute('''CREATE TABLE IF NOT EXISTS users (
                   id serial PRIMARY KEY,
                   id_tg INTEGER,
-                  name TEXT DEFAULT "0",
+                  name TEXT,
                   speed INTEGER DEFAULT 5,
                   health INTEGER DEFAULT 10,
                   busy INTEGER DEFAULT 0,

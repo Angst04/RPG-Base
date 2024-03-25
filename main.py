@@ -32,18 +32,6 @@ class RegisterMessages(StatesGroup):
 
 @dp.message(StateFilter(None), Command("start"))
 async def cmd_menu(message: Message, state: FSMContext):
-   db.start() # нужно будет убрать отсюда
-
-   # при первом добавлении таблицы не вписывать сюда
-   db.firstSeen(message.chat.id, 'users')
-   db.firstSeen(message.chat.id, 'users_map')
-   db.firstSeen(message.chat.id, 'transition_events')
-   db.firstSeen(message.chat.id, 'achievements')
-   db.firstSeen(message.chat.id, 'collections')
-   db.firstSeen(message.chat.id, 'inventories')
-   db.firstSeen(message.chat.id, 'quests')
-   db.firstSeen(message.chat.id, 'fragments')
-   
    conn = psycopg2.connect(
          host=host,
          user=user,
@@ -53,10 +41,10 @@ async def cmd_menu(message: Message, state: FSMContext):
    cur = conn.cursor()
    
    cur.execute(f'SELECT name FROM users WHERE id_tg=%s', [message.chat.id])
-   if cur.fetchone()[0] != '0':
+   if cur.fetchone()[0] != None:
       await message.answer('Вы уже проходили регистрацию. Изменить имя можно в другом месте')
-      await sleep(5)
-      await message.bot.delete_messages(message.chat.id, [message.message_id + 1, message.message_id])
+      # await sleep(5)
+      # await message.bot.delete_messages(message.chat.id, [message.message_id + 1, message.message_id])
 
    else:
       await message.answer('Привет странник! Как тебя зовут?')
@@ -151,7 +139,18 @@ async def cbd_menu_other(callback: CallbackQuery):
 # создание базы данных
 @dp.message(Command('db'))
 async def cmd_db(message: Message):
-   db.start()
+   db.start()   
+
+   # при первом добавлении таблицы не вписывать сюда
+   db.firstSeen(message.chat.id, 'users')
+   db.firstSeen(message.chat.id, 'users_map')
+   db.firstSeen(message.chat.id, 'transition_events')
+   db.firstSeen(message.chat.id, 'achievements')
+   db.firstSeen(message.chat.id, 'collections')
+   db.firstSeen(message.chat.id, 'inventories')
+   db.firstSeen(message.chat.id, 'quests')
+   db.firstSeen(message.chat.id, 'fragments')
+   
    await message.answer('Пользователь добавлен в БД')
 
 @dp.message(Command('drop'))
