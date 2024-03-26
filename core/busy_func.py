@@ -16,3 +16,19 @@ async def busy_change(chat_id, status):
    conn.commit()
    cur.close()
    conn.close()
+   
+async def busy_check(message):
+   conn = psycopg2.connect(
+      host=host,
+      user=user,
+      password=password,
+      database=db_name
+   )
+   cur = conn.cursor()
+   cur.execute(f'SELECT busy FROM users WHERE id_tg=%s', [message.chat.id])
+   res = cur.fetchone()[0]
+   cur.close()
+   conn.close()
+   if res == 1:
+      return True
+   return False

@@ -7,7 +7,7 @@ import psycopg2
 from core.dbs_config import host, user, password, db_name
 
 from core.health_ind import health_ind
-from core.busy_change import busy_change
+from core.busy_func import busy_change
 
 router = Router()
 
@@ -67,6 +67,7 @@ async def f(callback: CallbackQuery):
    enemy_health -= 5
    if enemy_health <= 0:
       await busy_change(chat_id=callback.message.chat.id, status=False)
+      
       builder = InlineKeyboardBuilder()
       builder.row(InlineKeyboardButton(text='Забрать добычу', callback_data='menu'))
       

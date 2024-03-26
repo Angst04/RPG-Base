@@ -16,6 +16,7 @@ from storylines import test_storie
 from core.keyboards import kb_menu, kb_menu_other
 import core.databases as db
 from apps.battle import battle_main
+from core.busy_func import busy_check
 import config
 
 import psycopg2
@@ -32,6 +33,20 @@ class RegisterMessages(StatesGroup):
 
 @dp.message(StateFilter(None), Command("start"))
 async def cmd_menu(message: Message, state: FSMContext):
+   await message.answer('Здесь должно быть приветственное сообщение или что-то такое')
+   await sleep(1)
+   
+   db.start()   
+   
+   db.firstSeen(message.chat.id, 'users')
+   db.firstSeen(message.chat.id, 'users_map')
+   db.firstSeen(message.chat.id, 'transition_events')
+   db.firstSeen(message.chat.id, 'achievements')
+   db.firstSeen(message.chat.id, 'collections')
+   db.firstSeen(message.chat.id, 'inventories')
+   db.firstSeen(message.chat.id, 'quests')
+   db.firstSeen(message.chat.id, 'fragments')
+   
    conn = psycopg2.connect(
          host=host,
          user=user,
@@ -83,33 +98,32 @@ async def reg_step1(message: Message, state: FSMContext):
 menu_message_ids = {} # нужно перенести в бд !
 @dp.message(Command('menu'))
 async def cmd_menu(message: Message):
-   conn = psycopg2.connect(
-      host=host,
-      user=user,
-      password=password,
-      database=db_name
-   )
-   cur = conn.cursor()
-   cur.execute(f'SELECT busy FROM users WHERE id_tg=%s', [message.chat.id])
-   if cur.fetchone()[0] == 1:
-      # должно всплывать "не сейчас"
-      return
-   
-   chat_id = message.chat.id
+   if not await busy_check(message):
+      conn = psycopg2.connect(
+         host=host,
+         user=user,
+         password=password,
+         database=db_name
+      )
+      cur = conn.cursor()
+      
+      chat_id = message.chat.id
 
-   if chat_id in menu_message_ids:
-      prev_menu_id = menu_message_ids[chat_id]
-      try:
-         await message.bot.delete_messages(chat_id, [prev_menu_id, prev_menu_id - 1])
-         await sleep(0.75)
-      except TelegramBadRequest:
-         pass
+      if chat_id in menu_message_ids:
+         prev_menu_id = menu_message_ids[chat_id]
+         try:
+            await message.bot.delete_messages(chat_id, [prev_menu_id, prev_menu_id - 1])
+            await sleep(0.75)
+         except TelegramBadRequest:
+            pass
 
-   menu_message = await message.answer(reply_markup=kb_menu(chat_id), text='Вы находитесь в меню')
-   menu_message_ids[chat_id] = menu_message.message_id
+      menu_message = await message.answer(reply_markup=kb_menu(chat_id), text='Вы находитесь в меню')
+      menu_message_ids[chat_id] = menu_message.message_id
 
-   # await sleep(1)
-   # await message.bot.pin_chat_message(chat_id, menu_message.message_id)
+      # await sleep(1)
+      # await message.bot.pin_chat_message(chat_id, menu_message.message_id)
+   else:
+      await message.delete()
 
 @dp.callback_query(F.data == 'menu')
 async def cbd_menu(callback: CallbackQuery):
