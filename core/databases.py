@@ -1,5 +1,5 @@
 import psycopg2
-from core.dbs_config import host, user, password, db_name
+from core.config import DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
 
 def firstSeen(get_id, name):
    conn = psycopg2.connect(
@@ -51,7 +51,7 @@ def start():
       cur.execute('''CREATE TABLE IF NOT EXISTS users_map (
                   id serial PRIMARY KEY,
                   id_tg INTEGER,
-                  now_location TEXT DEFAULT 'Эвертон',
+                  now_location TEXT DEFAULT 'имение Чапси',
                   Copper INTEGER DEFAULT 0,
                   Emberwood INTEGER DEFAULT 0
       )''')

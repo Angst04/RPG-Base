@@ -3,7 +3,7 @@ from aiogram.types import CallbackQuery, InlineKeyboardButton, FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import psycopg2
-from core.dbs_config import host, user, password, db_name
+from core.config import DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
 
 from time import sleep
 

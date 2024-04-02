@@ -2,7 +2,7 @@ from random import random, choice
 from time import time
 
 import psycopg2
-from core.dbs_config import host, user, password, db_name
+from core.config import DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
 
 events = [
    'Западня',

@@ -10,7 +10,7 @@ router = Router()
 
 cardsID = []
 
-with open('Base/data/cards.json', 'r') as file:
+with open('./data/cards.json', 'r') as file:
    card_data = json.load(file)
 
 for card in card_data['cards']:

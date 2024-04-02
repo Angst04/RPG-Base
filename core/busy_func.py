@@ -1,5 +1,5 @@
 import psycopg2
-from core.dbs_config import host, user, password, db_name
+from core.config import DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
 
 async def busy_change(chat_id, status):
    conn = psycopg2.connect(

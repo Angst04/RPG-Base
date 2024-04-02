@@ -9,7 +9,7 @@ router = Router()
 @router.callback_query(F.data == 'enemy_Ворох')
 async def f(callback: CallbackQuery):
    text = 'Враг стоит'
-   photo = FSInputFile('Base/data/images/cards/c_0002.png')
+   photo = FSInputFile('./data/images/cards/c_0002.png')
    amount = 15
    
    await battle_prepare(callback=callback, text=text, photo=photo, amount=amount)

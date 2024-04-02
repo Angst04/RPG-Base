@@ -12,19 +12,19 @@ from aiogram.types import InlineKeyboardButton
 
 
 from handlers import main_menu, webapp
-from storylines import test_storie
+from story import test_storie, chapter_0
 from core.keyboards import kb_menu, kb_menu_other
 import core.databases as db
 from apps.battle import battle_main
-from core.busy_func import busy_check
-import config
+from core.busy_func import busy_check, busy_change
+from core.config import TOKEN
 
 import psycopg2
-from core.dbs_config import host, user, password, db_name
+from core.config import DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
 
 # логирование
 logging.basicConfig(level=logging.INFO)
-bot = Bot(token=config.TOKEN)
+bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 
@@ -33,8 +33,8 @@ class RegisterMessages(StatesGroup):
 
 @dp.message(StateFilter(None), Command("start"))
 async def cmd_menu(message: Message, state: FSMContext):
+   await busy_change(chat_id=message.chat.id, status=True)
    await message.answer('Здесь должно быть приветственное сообщение или что-то такое')
-   await sleep(1)
    
    db.start()   
    
@@ -46,6 +46,8 @@ async def cmd_menu(message: Message, state: FSMContext):
    db.firstSeen(message.chat.id, 'inventories')
    db.firstSeen(message.chat.id, 'quests')
    db.firstSeen(message.chat.id, 'fragments')
+   
+   await sleep(1)
    
    conn = psycopg2.connect(
          host=host,
@@ -68,7 +70,7 @@ async def cmd_menu(message: Message, state: FSMContext):
 @dp.message(F.text, RegisterMessages.name)
 async def reg_step1(message: Message, state: FSMContext):
    # нужно написать фильтр на имена
-   if message.text == 'Justifall':
+   if message.text != 'abc':
       conn = psycopg2.connect(
          host=host,
          user=user,
@@ -86,7 +88,7 @@ async def reg_step1(message: Message, state: FSMContext):
       await sleep(1.5)
       
       builder = InlineKeyboardBuilder()
-      builder.row(InlineKeyboardButton(text='Перейти в меню', callback_data='menu'))
+      builder.row(InlineKeyboardButton(text='Очнуться...', callback_data='ch_0_msg_0'))
       
       await message.answer(text='Теперь вы готовы отправиться в грандиозное приключение!', reply_markup=builder.as_markup())
       await sleep(1.5)
@@ -184,6 +186,7 @@ async def f(callback: CallbackQuery):
 
 async def main():
    dp.include_routers(main_menu.router, test_storie.router, webapp.router, battle_main.router)
+   dp.include_routers(chapter_0.router)
 
    # ответ на сообщения, отправленные до включения бота
    # await bot.delete_webhook(drop_pending_updates=True)

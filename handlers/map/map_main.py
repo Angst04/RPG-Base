@@ -5,7 +5,7 @@ from aiogram.types import CallbackQuery, InlineKeyboardButton, FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import psycopg2
-from core.dbs_config import host, user, password, db_name
+from core.config import DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
 
 from random import randint
 from math import ceil
@@ -31,19 +31,19 @@ async def cbd_map(callback):
    builder.row(InlineKeyboardButton(text=f'{now_location.title()} <- вы здесь', callback_data='#'))
 
    if now_location == 'Эвертон':
-      photo = FSInputFile('Base/data/images/map_tiles/everton.jpg')
+      photo = FSInputFile('./data/images/map_tiles/everton.jpg')
 
       builder.row(InlineKeyboardButton(text='Имение Чапси', callback_data='имение Чапси'))
       builder.row(InlineKeyboardButton(text='Амбербрук', callback_data='Амбербрук'))
    elif now_location == 'Амбербрук':
-      photo = FSInputFile('Base/data/images/map_tiles/everton.jpg')
+      photo = FSInputFile('./data/images/map_tiles/everton.jpg')
 
       builder.row(InlineKeyboardButton(text='Эвертон', callback_data='Эвертон'))
       cur.execute(f'SELECT Copper FROM users_map WHERE id_tg = %s', [callback.message.chat.id])
       if cur.fetchone()[0] == 1:
          builder.row(InlineKeyboardButton(text='Коппер', callback_data='Коппер'))
    elif now_location == 'имение Чапси':
-      photo = FSInputFile('Base/data/images/map_tiles/everton.jpg')
+      photo = FSInputFile('./data/images/map_tiles/everton.jpg')
 
       builder.row(InlineKeyboardButton(text='Эвертон', callback_data='Эвертон'))
       cur.execute(f'SELECT Emberwood FROM users_map WHERE id_tg = %s', [callback.message.chat.id])
@@ -52,12 +52,12 @@ async def cbd_map(callback):
 
    # Окрестности
    elif now_location == 'лесопилка Доппи':
-      photo = FSInputFile('Base/data/images/map_tiles/environs/everton_environs.jpg') # нужно заменить фотки
+      photo = FSInputFile('./data/images/map_tiles/environs/everton_environs.jpg') # нужно заменить фотки
    elif now_location == 'тестовая локация':
-      photo = FSInputFile('Base/data/images/map_tiles/environs/amberbrook_environs.jpg')
+      photo = FSInputFile('./data/images/map_tiles/environs/amberbrook_environs.jpg')
 
    else:
-      photo = FSInputFile('Base/data/images/white.png')
+      photo = FSInputFile('./data/images/white.png')
 
    cur.close()
    conn.close()
