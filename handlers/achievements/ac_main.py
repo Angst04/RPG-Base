@@ -16,13 +16,14 @@ async def cbd_achievements(callback):
    builder = InlineKeyboardBuilder()
    k = 0
 
-   cur.execute(f'SELECT a1 FROM achievements WHERE id_tg = %s', [callback.message.chat.id])
+   cur.execute(f'SELECT "Серьёзный выбор" FROM achievements WHERE id_tg = %s', [callback.message.chat.id])
    if cur.fetchone()[0] == 1:
-      builder.row(InlineKeyboardButton(text='Серьёзный выбор', callback_data='AC1'))
+      builder.row(InlineKeyboardButton(text='Серьёзный выбор', callback_data='Серьёзный выбор'))
       k += 1
-   cur.execute(f'SELECT a2 FROM achievements WHERE id_tg = %s', [callback.message.chat.id])
+      
+   cur.execute(f'SELECT "Не менее серьёзный выбор" FROM achievements WHERE id_tg = %s', [callback.message.chat.id])
    if cur.fetchone()[0] == 1:
-      builder.row(InlineKeyboardButton('Не менее серьёзный выбор', callback_data='AC2'))
+      builder.row(InlineKeyboardButton('Не менее серьёзный выбор', callback_data='Не менее серьёзный выбор'))
       k += 1
 
    builder.row(InlineKeyboardButton(text='Назад', callback_data='menu_other'))

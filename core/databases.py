@@ -67,8 +67,8 @@ def start():
       cur.execute('''CREATE TABLE IF NOT EXISTS achievements (
                   id serial PRIMARY KEY,
                   id_tg INTEGER,
-                  a1 INTEGER DEFAULT 0,
-                  a2 INTEGER DEFAULT 0
+                  "Серьёзный выбор" INTEGER DEFAULT 0,
+                  "Не менее серьёзный выбор" INTEGER DEFAULT 0
       )''')
       
       cur.execute('''CREATE TABLE IF NOT EXISTS inventories (

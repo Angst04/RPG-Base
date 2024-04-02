@@ -2,11 +2,9 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-import psycopg2
-from core.config import DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
-
 from time import sleep
 
+from core.ac_func import get_ac
 from handlers.fragments import raise_fragment
 
 router = Router()
@@ -36,23 +34,7 @@ async def test_msg_2(callback: CallbackQuery):
 
 @router.callback_query(F.data == 'test_msg_3')
 async def test_msg_2(callback: CallbackQuery):
-   conn = psycopg2.connect(
-      host=host,
-      user=user,
-      password=password,
-      database=db_name
-   )
-   cur = conn.cursor()
-
-   cur.execute(f'SELECT a1 FROM achievements WHERE id_tg = %s', [callback.message.chat.id])
-   if cur.fetchone() != 1:
-      await callback.answer(text='Получено достижение!', show_alert=True)
-
-   cur.execute(f'UPDATE achievements SET a1 = 1 WHERE id_tg=%s', [callback.message.chat.id])
-
-   conn.commit()
-   cur.close()
-   conn.close()
+   await get_ac(callback=callback, ac_name='Серьёзный выбор')
 
    await callback.message.answer(text='Вы в саду')
 

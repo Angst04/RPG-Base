@@ -2,15 +2,14 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-import psycopg2
-from core.config import DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
-
 from time import sleep
 
 router = Router()
 
 @router.callback_query(F.data == 'ch_0_msg_0')
 async def test_msg_1(callback: CallbackQuery):
+   await callback.message.delete_reply_markup()
+   
    text = 'Довольно необычное ощущение проснуться где-то в амбаре под сеном. Обычно в такие моменты пытаешься перебрать всё произошедшее вчера, но в этот раз вы не можете вспомнить абсолютно ничего'
    
    builder = InlineKeyboardBuilder()
@@ -71,7 +70,7 @@ async def test_msg_1(callback: CallbackQuery):
    text = '<blockquote>Libertas! Не позволю кровожадным убийцам отнимать нашу пищу!</blockquote> - Кричит мужчина в плаще'
    
    await callback.message.answer(text=text, parse_mode='HTML')
-   sleep(1.5)
+   sleep(3)
    
    text = 'Бедолагу сбивают с ногу и он падает в грязь. В это же мгновение стражник оголяет ножны и тянется за лезвием. Вам такой расклад не очень понравился, учитывая что все жители не особо доброжелательны к вам и униженный страдалец единственный вызывает доверие, и вы, то ли от безрассудства, то ли от желания справедливости, выхватили из рук одного из сельчан ржавый топор и набросились на стражника. Напористым тупым ударом в грудь вы опрокидываете стражника'
    await callback.message.answer(text=text)
