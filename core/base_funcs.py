@@ -11,9 +11,10 @@ async def get_ac(callback, ac_name):
       database=db_name
    )
    cur = conn.cursor()
+   
 
    cur.execute(f'SELECT "{ac_name}" FROM achievements WHERE id_tg = %s', [callback.message.chat.id])
-   if cur.fetchone() != 1:
+   if cur.fetchone()[0] != 1:
       await callback.answer(text=f'Получено достижение!\n\n{ac_name}', show_alert=True)
 
    cur.execute(f'UPDATE achievements SET "{ac_name}" = 1 WHERE id_tg=%s', [callback.message.chat.id])
