@@ -6,8 +6,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 import psycopg2
 from core.config import DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
 
-from core.health_ind import health_ind
-from core.busy_func import busy_change
+from core.base_funcs import health_ind, busy_change
 
 router = Router()
 

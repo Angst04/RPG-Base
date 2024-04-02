@@ -4,7 +4,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from time import sleep
 
-from core.ac_func import get_ac
+from core.base_funcs import get_ac
 from handlers.fragments import raise_fragment
 
 router = Router()

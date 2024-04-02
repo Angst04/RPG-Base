@@ -9,7 +9,7 @@ from core.config import DB_HOST as host, DB_USER as user, DB_PASSWORD as passwor
 
 from apps.battle.enemies import enemy_1, enemy_2
 from apps.battle import battle_func
-from core.busy_func import busy_change
+from core.base_funcs import busy_change
 
 from random import choice
 

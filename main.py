@@ -13,14 +13,15 @@ from aiogram.types import InlineKeyboardButton
 
 from handlers import main_menu, webapp
 from story import test_storie, chapter_0
+
+from apps.battle import battle_main
+
 from core.keyboards import kb_menu, kb_menu_other
 import core.databases as db
-from apps.battle import battle_main
-from core.busy_func import busy_check, busy_change
-from core.config import TOKEN
+from core.base_funcs import busy_check, busy_change
 
 import psycopg2
-from core.config import DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
+from core.config import TOKEN, DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
 
 # логирование
 logging.basicConfig(level=logging.INFO)
