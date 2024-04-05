@@ -1,3 +1,4 @@
 config.py
+.env
 # data
 Base/core/dbs_config.py

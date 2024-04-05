@@ -1,6 +1,8 @@
+from aiogram.types import FSInputFile
+
+import json
 import psycopg2
 from core.config import DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
-
 
 # функция для получения достижения
 async def get_ac(callback, ac_name):
@@ -83,3 +85,26 @@ async def busy_check(message):
    if res == 1:
       return True
    return False
+
+
+async def get_card(callback, card_id):
+   conn = psycopg2.connect(
+      host=host,
+      user=user,
+      password=password,
+      database=db_name
+   )
+   cur = conn.cursor()
+   cur.execute(f'UPDATE collections SET "{card_id}" = 1 WHERE id_tg=%s', [callback.message.chat.id])
+   conn.commit()
+   cur.close()
+   conn.close()
+   
+   with open('./data/cards.json', 'r') as file:
+      card_data = json.load(file)
+   
+   for card in card_data['cards']:
+         if card['id'] == card_id:
+            title = card['title']
+            
+   await callback.answer(text=f'Получена новая карта!\n\n{title}', show_alert=True)

@@ -23,6 +23,7 @@ async def f(callback: CallbackQuery):
 
 @router.callback_query(F.data == 'map')
 async def f(callback: CallbackQuery):
+   await callback.message.bot.delete_messages(callback.message.chat.id, [callback.message.message_id - 1])
    await cbd_map(callback)
    
 @router.callback_query(F.data == 'town')

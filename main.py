@@ -34,7 +34,7 @@ class RegisterMessages(StatesGroup):
 
 @dp.message(StateFilter(None), Command("start"))
 async def cmd_menu(message: Message, state: FSMContext):
-   await busy_change(chat_id=message.chat.id, status=True)
+   # await busy_change(chat_id=message.chat.id, status=True)
    await message.answer('Здесь должно быть приветственное сообщение или что-то такое')
    
    db.start()   
@@ -98,55 +98,75 @@ async def reg_step1(message: Message, state: FSMContext):
       await message.answer('Это имя занято, введите другое')
 
 # главное меню
-menu_message_ids = {} # нужно перенести в бд !
+# menu_message_ids = {} # нужно перенести в бд !
 @dp.message(Command('menu'))
 async def cmd_menu(message: Message):
-   if not await busy_check(message):
-      conn = psycopg2.connect(
+   conn = psycopg2.connect(
          host=host,
          user=user,
          password=password,
          database=db_name
       )
-      cur = conn.cursor()
+   cur = conn.cursor()
       
-      chat_id = message.chat.id
+   if not await busy_check(message):   
+      # chat_id = message.chat.id
 
-      if chat_id in menu_message_ids:
-         prev_menu_id = menu_message_ids[chat_id]
+      cur.execute(f'SELECT menu_id FROM users WHERE id_tg = %s', [message.chat.id])
+      res = cur.fetchone()[0]
+      if res != None:
          try:
-            await message.bot.delete_messages(chat_id, [prev_menu_id, prev_menu_id - 1])
+            await message.bot.delete_messages(message.chat.id, [res, res - 1])
             await sleep(0.75)
          except TelegramBadRequest:
             pass
+            
+      # if chat_id in menu_message_ids:
+      #    prev_menu_id = menu_message_ids[chat_id]
+      #    try:
+      #       await message.bot.delete_messages(chat_id, [prev_menu_id, prev_menu_id - 1])
+      #       await sleep(0.75)
+      #    except TelegramBadRequest:
+      #       pass
 
-      menu_message = await message.answer(reply_markup=kb_menu(chat_id), text='Вы находитесь в меню')
-      menu_message_ids[chat_id] = menu_message.message_id
-
-      # await sleep(1)
-      # await message.bot.pin_chat_message(chat_id, menu_message.message_id)
+      menu_message = await message.answer(reply_markup=kb_menu(message.chat.id), text='Вы находитесь в меню')
+      # menu_message_ids[message.chat.id] = menu_message.message_id
+      
+      cur.execute(f'UPDATE users SET menu_id = {menu_message.message_id} WHERE id_tg=%s', [message.chat.id])
+      conn.commit()
+      cur.close()
+      conn.close()
    else:
       await message.delete()
+      await message.answer(text='Сейчас вызов меню недоступен', show_alert=True)
 
 @dp.callback_query(F.data == 'menu')
 async def cbd_menu(callback: CallbackQuery):
-   chat_id = callback.message.chat.id
-   # need_pin = True
+   conn = psycopg2.connect(
+         host=host,
+         user=user,
+         password=password,
+         database=db_name
+      )
+   cur = conn.cursor()
+   
+   # chat_id = callback.message.chat.id
+
    try:
-      menu_message = await callback.message.edit_text(text='Вы находитесь в меню', reply_markup=kb_menu(chat_id))
-      # need_pin = False
+      menu_message = await callback.message.edit_text(text='Вы находитесь в меню', reply_markup=kb_menu(callback.message.chat.id))
    except TelegramBadRequest:
       try:
          await callback.message.delete()
       except TelegramBadRequest:
          pass
       await sleep(0.75)
-      menu_message = await callback.message.answer(text='Вы находитесь в меню', reply_markup=kb_menu(chat_id))
-   menu_message_ids[callback.message.chat.id] = menu_message.message_id
-
-   # if need_pin:
-   #    await sleep(1)
-   #    await callback.message.bot.pin_chat_message(callback.message.chat.id, menu_message.message_id)
+      menu_message = await callback.message.answer(text='Вы находитесь в меню', reply_markup=kb_menu(callback.message.chat.id))
+      
+   cur.execute(f'UPDATE users SET menu_id = {menu_message.message_id} WHERE id_tg=%s', [callback.message.chat.id])
+   conn.commit()
+   cur.close()
+   conn.close()
+   # menu_message_ids[callback.message.chat.id] = menu_message.message_id
 
 
 @dp.callback_query(F.data == 'menu_other')
