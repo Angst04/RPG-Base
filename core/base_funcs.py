@@ -108,3 +108,22 @@ async def get_card(callback, card_id):
             title = card['title']
             
    await callback.answer(text=f'Получена новая карта!\n\n{title}', show_alert=True)
+   
+
+async def check_menu_id(callback):
+   conn = psycopg2.connect(
+         host=host,
+         user=user,
+         password=password,
+         database=db_name
+      )
+   cur = conn.cursor()
+   cur.execute(f'SELECT menu_id FROM users WHERE id_tg = %s', [callback.message.chat.id])
+   res = cur.fetchone()[0]
+   conn.close()
+   cur.close()   
+   if callback.message.message_id == res:
+      return True
+   else:
+      await callback.answer(text='Данное меню не актуально\nВоспользуйтесь командой\n/menu', show_alert=True)
+      return False

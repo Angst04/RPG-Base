@@ -16,7 +16,7 @@ from story import test_storie, chapter_0
 
 from apps.battle import battle_main
 
-from core.keyboards import kb_menu, kb_menu_other
+from core.keyboards import kb_menu
 import core.databases as db
 from core.base_funcs import busy_check, busy_change
 
@@ -108,7 +108,7 @@ async def cmd_menu(message: Message):
          database=db_name
       )
    cur = conn.cursor()
-      
+
    if not await busy_check(message):   
       # chat_id = message.chat.id
 
@@ -168,11 +168,6 @@ async def cbd_menu(callback: CallbackQuery):
    conn.close()
    # menu_message_ids[callback.message.chat.id] = menu_message.message_id
 
-
-@dp.callback_query(F.data == 'menu_other')
-async def cbd_menu_other(callback: CallbackQuery):
-   await callback.message.edit_text(text='Вы находитесь в дополнительном меню', reply_markup=kb_menu_other)
-
 # создание базы данных
 @dp.message(Command('db'))
 async def cmd_db(message: Message):
@@ -206,8 +201,8 @@ async def f(callback: CallbackQuery):
 
 
 async def main():
-   dp.include_routers(main_menu.router, test_storie.router, webapp.router, battle_main.router)
-   dp.include_routers(chapter_0.router)
+   dp.include_routers(main_menu.router, webapp.router, battle_main.router)
+   dp.include_routers(test_storie.router, chapter_0.router)
 
    # ответ на сообщения, отправленные до включения бота
    # await bot.delete_webhook(drop_pending_updates=True)

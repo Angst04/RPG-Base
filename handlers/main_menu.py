@@ -15,35 +15,54 @@ from handlers import info_click
 from handlers.fragments import cbd_fragments
 from handlers.hero import cbd_hero
 
+from core.base_funcs import check_menu_id
+from core.keyboards import kb_menu_other
+
+import psycopg2
+from core.config import TOKEN, DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
+
 router = Router()
 
 @router.callback_query(F.data == 'achievements')
 async def f(callback: CallbackQuery):
-   await cbd_achievements(callback)
+   if await check_menu_id(callback):
+      await cbd_achievements(callback)
+   
 
 @router.callback_query(F.data == 'map')
 async def f(callback: CallbackQuery):
-   await callback.message.bot.delete_messages(callback.message.chat.id, [callback.message.message_id - 1])
-   await cbd_map(callback)
+   if await check_menu_id(callback):
+      await callback.message.bot.delete_messages(callback.message.chat.id, [callback.message.message_id - 1])
+      await cbd_map(callback)
    
 @router.callback_query(F.data == 'town')
 async def f(callback: CallbackQuery):
-   await cbd_town(callback)
+   if await check_menu_id(callback):
+      await cbd_town(callback)
 
 @router.callback_query(F.data == 'environs')
 async def f(callback: CallbackQuery):
-   await cbd_environs(callback)
+   if await check_menu_id(callback):
+      await cbd_environs(callback)
    
 @router.callback_query(F.data == 'my_quests')
 async def f(callback: CallbackQuery):
-   await cbd_quests(callback)
+   if await check_menu_id(callback):
+      await cbd_quests(callback)
    
 @router.callback_query(F.data == 'fragments')
 async def f(callback: CallbackQuery):
-   await cbd_fragments(callback)
+   if await check_menu_id(callback):
+      await cbd_fragments(callback)
    
 @router.callback_query(F.data == 'hero')
 async def f(callback: CallbackQuery):
-   await cbd_hero(callback)
+   if await check_menu_id(callback):
+      await cbd_hero(callback)
+      
+@router.callback_query(F.data == 'menu_other')
+async def cbd_menu_other(callback: CallbackQuery):
+   if await check_menu_id(callback):
+      await callback.message.edit_text(text='Вы находитесь в дополнительном меню', reply_markup=kb_menu_other)
 
 router.include_routers(map_main.router, map_environs.router, ac_desc.router, town_main.router, my_quests.router, info_click.router)
