@@ -20,10 +20,19 @@ async def cbd_hero(callback):
    health = cur.fetchone()[0]
    cur.execute(f'SELECT speed FROM users WHERE id_tg = %s', [callback.message.chat.id])
    speed = cur.fetchone()[0]
+   cur.execute(f'SELECT money FROM users WHERE id_tg = %s', [callback.message.chat.id])
+   money = cur.fetchone()[0]
    cur.close()
    conn.close()
    
    builder.row(InlineKeyboardButton(text='Назад', callback_data='menu_other'))
    
-   text = f'<b>Информация о вашем герое</b>\n\n<b>Здоровье:</b> {health}\n<b>Скорость передвижения:</b> {speed}'
-   await callback.message.edit_text(text=text, reply_markup=builder.as_markup(), parse_mode='HTML')
+   await callback.message.edit_text(
+      text='<b>Информация о вашем герое</b>\n\n'
+      f'<b>Здоровье:</b> {health}\n'
+      f'<b>Скорость передвижения:</b> {speed}\n'
+      f'<b>Лумены:</b> {money}',
+      
+      reply_markup=builder.as_markup(), 
+      parse_mode='HTML'
+      )

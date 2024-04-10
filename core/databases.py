@@ -43,6 +43,7 @@ def start():
                   name TEXT,
                   speed INTEGER DEFAULT 5,
                   health INTEGER DEFAULT 10,
+                  money INTEGER DEFAULT 0,
                   busy INTEGER DEFAULT 0,
                   enemy_health INTEGER DEFAULT 0, 
                   menu_id INTEGER
