@@ -23,6 +23,13 @@ from core.base_funcs import busy_check, busy_change
 import psycopg2
 from core.config import TOKEN, DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
 
+import boto3
+from io import BytesIO
+import tempfile
+import os
+
+s3 = boto3.client("s3", endpoint_url="https://s3.storage.selcloud.ru", region_name="ru-1", aws_access_key_id="5e2be2afd7724b6bbe8ae4455b000f46", aws_secret_access_key="201da4548a724a718f88a5a2da791fd9")
+
 # логирование
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=TOKEN)
@@ -98,7 +105,6 @@ async def reg_step1(message: Message, state: FSMContext):
       await message.answer('Это имя занято, введите другое')
 
 # главное меню
-# menu_message_ids = {} # нужно перенести в бд !
 @dp.message(Command('menu'))
 async def cmd_menu(message: Message):
    conn = psycopg2.connect(
@@ -109,9 +115,7 @@ async def cmd_menu(message: Message):
       )
    cur = conn.cursor()
 
-   if not await busy_check(message):   
-      # chat_id = message.chat.id
-
+   if not await busy_check(message):
       cur.execute(f'SELECT menu_id FROM users WHERE id_tg = %s', [message.chat.id])
       res = cur.fetchone()[0]
       if res != None:
@@ -120,17 +124,8 @@ async def cmd_menu(message: Message):
             await sleep(0.75)
          except TelegramBadRequest:
             pass
-            
-      # if chat_id in menu_message_ids:
-      #    prev_menu_id = menu_message_ids[chat_id]
-      #    try:
-      #       await message.bot.delete_messages(chat_id, [prev_menu_id, prev_menu_id - 1])
-      #       await sleep(0.75)
-      #    except TelegramBadRequest:
-      #       pass
-
+         
       menu_message = await message.answer(reply_markup=kb_menu(message.chat.id), text='Вы находитесь в меню')
-      # menu_message_ids[message.chat.id] = menu_message.message_id
       
       cur.execute(f'UPDATE users SET menu_id = {menu_message.message_id} WHERE id_tg=%s', [message.chat.id])
       conn.commit()
@@ -150,8 +145,6 @@ async def cbd_menu(callback: CallbackQuery):
       )
    cur = conn.cursor()
    
-   # chat_id = callback.message.chat.id
-
    try:
       menu_message = await callback.message.edit_text(text='Вы находитесь в меню', reply_markup=kb_menu(callback.message.chat.id))
    except TelegramBadRequest:
@@ -166,12 +159,11 @@ async def cbd_menu(callback: CallbackQuery):
    conn.commit()
    cur.close()
    conn.close()
-   # menu_message_ids[callback.message.chat.id] = menu_message.message_id
 
 # создание базы данных
 @dp.message(Command('db'))
 async def cmd_db(message: Message):
-   db.start()   
+   db.start()
 
    # при первом добавлении таблицы не вписывать сюда
    db.firstSeen(message.chat.id, 'users')
@@ -184,6 +176,27 @@ async def cmd_db(message: Message):
    db.firstSeen(message.chat.id, 'fragments')
    
    await message.answer('Пользователь добавлен в БД')
+
+@dp.message(Command('test1'))
+async def cmd_db(message: Message):
+   photo_object = s3.get_object(Bucket="card-drafter-storage", Key="cards/card-1")
+   photo_data = photo_object["Body"].read()
+
+   with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+      temp_file.write(photo_data)
+      temp_file_name = temp_file.name
+
+   photo_input_file = FSInputFile(temp_file_name)
+
+   await message.answer_photo(photo=photo_input_file)
+
+   os.unlink(temp_file_name)
+   
+@dp.message(Command('test2'))
+async def cmd_db(message: Message):
+   photo = FSInputFile('./data/images/cards/c_0001.png')
+   
+   await message.answer_photo(photo=photo)
 
 @dp.message(Command('drop'))
 async def cmd_drop(message: Message):

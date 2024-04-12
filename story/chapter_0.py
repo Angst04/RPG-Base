@@ -83,7 +83,7 @@ async def test_msg_1(callback: CallbackQuery):
    text = 'Бедолагу сбивают с ног и он падает в грязь. В это же мгновение стражник оголяет ножны и тянется за лезвием. Вам такой расклад не очень понравился, учитывая что все жители не особо доброжелательны к вам и униженный страдалец единственный вызывает доверие, и вы, то ли от безрассудства, то ли от желания справедливости, выхватили из рук одного из сельчан ржавый топор и набросились на стражника. Напористым тупым ударом в грудь вы опрокидываете его'
    
    builder = InlineKeyboardBuilder()
-   builder.add(InlineKeyboardButton(text='Далее', callback_data='ch_0_msg_5'))
+   builder.add(InlineKeyboardButton(text='Кажется боя не избежать...', callback_data='ch_0_msg_5'))
    
    await callback.message.answer(text=text, reply_markup=builder.as_markup())
    
