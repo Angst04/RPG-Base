@@ -10,7 +10,6 @@ from aiogram.filters.command import Command
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardButton
 
-
 from handlers import main_menu, webapp
 from story import test_storie, chapter_0
 
@@ -23,16 +22,6 @@ from core.base_funcs import busy_check, busy_change
 import psycopg2
 from core.config import TOKEN, DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
 
-import redis
-redis_client = redis.Redis(
-   host='localhost', 
-   port=6379, 
-   db=0
-)
-
-import boto3
-import tempfile
-import os
 
 # логирование
 logging.basicConfig(level=logging.INFO)
