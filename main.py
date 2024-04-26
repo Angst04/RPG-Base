@@ -23,12 +23,16 @@ from core.base_funcs import busy_check, busy_change
 import psycopg2
 from core.config import TOKEN, DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
 
+import redis
+redis_client = redis.Redis(
+   host='localhost', 
+   port=6379, 
+   db=0
+)
+
 import boto3
-from io import BytesIO
 import tempfile
 import os
-
-s3 = boto3.client("s3", endpoint_url="https://s3.storage.selcloud.ru", region_name="ru-1", aws_access_key_id="5e2be2afd7724b6bbe8ae4455b000f46", aws_secret_access_key="201da4548a724a718f88a5a2da791fd9")
 
 # логирование
 logging.basicConfig(level=logging.INFO)
@@ -176,27 +180,6 @@ async def cmd_db(message: Message):
    db.firstSeen(message.chat.id, 'fragments')
    
    await message.answer('Пользователь добавлен в БД')
-
-@dp.message(Command('test1'))
-async def cmd_db(message: Message):
-   photo_object = s3.get_object(Bucket="card-drafter-storage", Key="cards/card-1")
-   photo_data = photo_object["Body"].read()
-
-   with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-      temp_file.write(photo_data)
-      temp_file_name = temp_file.name
-
-   photo_input_file = FSInputFile(temp_file_name)
-
-   await message.answer_photo(photo=photo_input_file)
-
-   os.unlink(temp_file_name)
-   
-@dp.message(Command('test2'))
-async def cmd_db(message: Message):
-   photo = FSInputFile('./data/images/cards/c_0001.png')
-   
-   await message.answer_photo(photo=photo)
 
 @dp.message(Command('drop'))
 async def cmd_drop(message: Message):
