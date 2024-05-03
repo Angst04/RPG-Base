@@ -177,6 +177,19 @@ async def cancelTransition(callback: CallbackQuery):
    await callback.message.delete()
    await sleep(0.75)
    await callback.message.answer(text='Путешествие отменено', reply_markup=builder.as_markup())
+   
+   conn = psycopg2.connect(
+         host=host,
+         user=user,
+         password=password,
+         database=db_name
+      )
+   cur = conn.cursor()
+   
+   cur.execute(f'UPDATE users SET menu_id = {callback.message.message_id + 1} WHERE id_tg=%s', [callback.message.chat.id])
+   conn.commit()
+   cur.close()
+   conn.close()
 
 
 @router.callback_query(F.data == 'имение Чапси')
