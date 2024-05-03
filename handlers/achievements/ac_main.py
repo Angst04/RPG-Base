@@ -14,22 +14,32 @@ async def cbd_achievements(callback):
    cur = conn.cursor()
 
    builder = InlineKeyboardBuilder()
-   k = 0
-
-   cur.execute(f'SELECT "Серьёзный выбор" FROM achievements WHERE id_tg = %s', [callback.message.chat.id])
-   if cur.fetchone()[0] == 1:
-      builder.row(InlineKeyboardButton(text='Серьёзный выбор', callback_data='Серьёзный выбор'))
-      k += 1
+   
+   flag = False
+   cur.execute(f"SELECT recieved FROM achievements WHERE id_tg = %s", [callback.message.chat.id])
+   res = cur.fetchone()[0]
+   if res:
+      flag = True
+      for ac in res:
+         builder.row(InlineKeyboardButton(text=ac, callback_data=ac))
+         
       
-   cur.execute(f'SELECT "Не менее серьёзный выбор" FROM achievements WHERE id_tg = %s', [callback.message.chat.id])
-   if cur.fetchone()[0] == 1:
-      builder.row(InlineKeyboardButton('Не менее серьёзный выбор', callback_data='Не менее серьёзный выбор'))
-      k += 1
+   # k = 0
+
+   # cur.execute(f'SELECT "Серьёзный выбор" FROM achievements WHERE id_tg = %s', [callback.message.chat.id])
+   # if cur.fetchone()[0] == 1:
+   #    builder.row(InlineKeyboardButton(text='Серьёзный выбор', callback_data='Серьёзный выбор'))
+   #    k += 1
+      
+   # cur.execute(f'SELECT "Не менее серьёзный выбор" FROM achievements WHERE id_tg = %s', [callback.message.chat.id])
+   # if cur.fetchone()[0] == 1:
+   #    builder.row(InlineKeyboardButton('Не менее серьёзный выбор', callback_data='Не менее серьёзный выбор'))
+   #    k += 1
 
    builder.row(InlineKeyboardButton(text='Назад', callback_data='menu_other'))
-   if k > 0:
+   if flag:
       await callback.message.edit_text(text='Ваши достижения', reply_markup=builder.as_markup())
-   elif k == 0:
+   else:
       await callback.message.edit_text(text='Здесь ничего нет(', reply_markup=builder.as_markup())
 
    cur.close()

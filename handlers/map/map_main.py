@@ -39,14 +39,14 @@ async def cbd_map(callback):
       photo = FSInputFile('./data/images/map_tiles/everton.jpg')
 
       builder.row(InlineKeyboardButton(text='Эвертон', callback_data='Эвертон'))
-      cur.execute(f'SELECT Copper FROM users_map WHERE id_tg = %s', [callback.message.chat.id])
+      cur.execute(f'SELECT Коппер FROM users_map WHERE id_tg = %s', [callback.message.chat.id])
       if cur.fetchone()[0] == 1:
          builder.row(InlineKeyboardButton(text='Коппер', callback_data='Коппер'))
    elif now_location == 'имение Чапси':
       photo = FSInputFile('./data/images/map_tiles/everton.jpg')
 
       builder.row(InlineKeyboardButton(text='Эвертон', callback_data='Эвертон'))
-      cur.execute(f'SELECT Emberwood FROM users_map WHERE id_tg = %s', [callback.message.chat.id])
+      cur.execute(f'SELECT Эмбервуд FROM users_map WHERE id_tg = %s', [callback.message.chat.id])
       if cur.fetchone()[0] == 1:
          builder.row(InlineKeyboardButton(text='Эмбервуд', callback_data='Эмбервуд'))
 

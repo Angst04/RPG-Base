@@ -25,17 +25,34 @@ async def func_quests(callback: CallbackQuery):
    
    flag = False
    if now_location == 'Эвертон':
+      loc_quests = ['q_1', 'q_2', 'q_3', 'q_4']
       text = 'Вы заходите в ратушу'
       
-      for index, quest in enumerate(quests[:4], start=1):
-         cur.execute(f"SELECT q_{index} FROM quests WHERE id_tg = %s", [callback.message.chat.id])
-         res = cur.fetchone()[0]
-         if res == 'open':
-            flag = True
-            builder.row(InlineKeyboardButton(text=quest['name'], callback_data=f'q_{index}_info'))
-         elif res == 'active':
-            flag = True
-            builder.row(InlineKeyboardButton(text=f"{quest['name']} ☑️", callback_data=f'q_{index}_info-active'))
+      cur.execute(f"SELECT active FROM quests WHERE id_tg = %s", [callback.message.chat.id])
+      res = cur.fetchone()[0]
+      if res:
+         flag = True
+         for quest in res:
+            if quest in loc_quests:
+               builder.row(InlineKeyboardButton(text=f'+ {quests[quest]["name"]} +', callback_data=f'{quest}-info-active'))
+               
+      cur.execute(f"SELECT open FROM quests WHERE id_tg = %s", [callback.message.chat.id])
+      res = cur.fetchone()[0]
+      if res:
+         flag = True
+         for quest in res:
+            if quest in loc_quests:
+               builder.row(InlineKeyboardButton(text=quests[quest]['name'], callback_data=f'{quest}-info'))
+      
+      # for index, quest in enumerate(quests[:4], start=1):
+      #    cur.execute(f"SELECT q_{index} FROM quests WHERE id_tg = %s", [callback.message.chat.id])
+      #    res = cur.fetchone()[0]
+      #    if res == 'open':
+      #       flag = True
+      #       builder.row(InlineKeyboardButton(text=quest['name'], callback_data=f'q_{index}_info'))
+      #    elif res == 'active':
+      #       flag = True
+      #       builder.row(InlineKeyboardButton(text=f"{quest['name']} ☑️", callback_data=f'q_{index}_info-active'))
          
 
    cur.close()
@@ -47,34 +64,34 @@ async def func_quests(callback: CallbackQuery):
       
    await callback.message.edit_text(text=text, reply_markup=builder.as_markup())
    
-@router.callback_query(F.data.endswith('_info'))
+@router.callback_query(F.data.endswith('-info'))
 async def f(callback: CallbackQuery):
-   quest_num = int(callback.data.split('_')[1])
-   name = quests[quest_num - 1]['name']
-   text = quests[quest_num - 1]['text']
+   quest_ind = callback.data.split('-')[0]
+   name = quests[quest_ind]['name']
+   text = quests[quest_ind]['text']
    
    builder = InlineKeyboardBuilder()
-   builder.row(InlineKeyboardButton(text='Принять', callback_data=f'q_{quest_num}_active'))
+   builder.row(InlineKeyboardButton(text='Принять', callback_data=f'{quest_ind}-active'))
    builder.row(InlineKeyboardButton(text='Назад', callback_data='quests'))
    
    await callback.message.edit_text(text=f'<b>{name}</b> \n\n {text}', reply_markup=builder.as_markup(), parse_mode='HTML')
    
-@router.callback_query(F.data.endswith('_info-active'))
+@router.callback_query(F.data.endswith('-info-active'))
 async def f(callback: CallbackQuery):
-   quest_num = int(callback.data.split('_')[1])
-   name = quests[quest_num - 1]['name']
-   text = quests[quest_num - 1]['text']
+   quest_ind = callback.data.split('-')[0]
+   name = quests[quest_ind]['name']
+   text = quests[quest_ind]['text']
    
    builder = InlineKeyboardBuilder()
-   builder.row(InlineKeyboardButton(text='Не отслеживать', callback_data=f'q_{quest_num}_diactive'))
+   builder.row(InlineKeyboardButton(text='Не отслеживать', callback_data=f'{quest_ind}-diactive'))
    builder.row(InlineKeyboardButton(text='Назад', callback_data='quests'))
    
    await callback.message.edit_text(text=f'<b>{name}</b> \n\n {text}', reply_markup=builder.as_markup(), parse_mode='HTML')
    
 
-@router.callback_query(F.data.endswith('_active'))
+@router.callback_query(F.data.endswith('-active'))
 async def f(callback: CallbackQuery):
-   quest_num = int(callback.data.split('_')[1])
+   quest_ind = callback.data.split('-')[0]
    conn = psycopg2.connect(
       host=host,
       user=user,
@@ -83,7 +100,9 @@ async def f(callback: CallbackQuery):
    )
    cur = conn.cursor()
    
-   cur.execute(f"UPDATE quests SET q_{quest_num} = 'active' WHERE id_tg=%s", [callback.message.chat.id])
+   # cur.execute(f"UPDATE quests SET q_{quest_num} = 'active' WHERE id_tg=%s", [callback.message.chat.id])
+   cur.execute(f"UPDATE quests SET active = active || %s WHERE id_tg = %s", ([quest_ind], callback.message.chat.id))
+   cur.execute(f"UPDATE quests SET open = array_remove(open, %s) WHERE id_tg = %s", (quest_ind, callback.message.chat.id))
    
    conn.commit()
    cur.close()
@@ -91,9 +110,9 @@ async def f(callback: CallbackQuery):
    
    await func_quests(callback)
 
-@router.callback_query(F.data.endswith('_diactive'))
+@router.callback_query(F.data.endswith('-diactive'))
 async def f(callback: CallbackQuery):
-   quest_num = int(callback.data.split('_')[1])
+   quest_ind = callback.data.split('-')[0]
    conn = psycopg2.connect(
       host=host,
       user=user,
@@ -102,7 +121,9 @@ async def f(callback: CallbackQuery):
    )
    cur = conn.cursor()
    
-   cur.execute(f"UPDATE quests SET q_{quest_num} = 'open' WHERE id_tg=%s", [callback.message.chat.id])
+   # cur.execute(f"UPDATE quests SET q_{quest_num} = 'open' WHERE id_tg=%s", [callback.message.chat.id])
+   cur.execute(f"UPDATE quests SET open = open || %s WHERE id_tg = %s", ([quest_ind], callback.message.chat.id))
+   cur.execute(f"UPDATE quests SET active = array_remove(active, %s) WHERE id_tg = %s", (quest_ind, callback.message.chat.id))
    
    conn.commit()
    cur.close()

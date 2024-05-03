@@ -4,8 +4,15 @@ import json
 import psycopg2
 from core.config import DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
 
+import redis
+redis_client = redis.Redis(
+   host='localhost', 
+   port=6379, 
+   db=0
+)
+
 # функция для получения достижения
-async def get_ac(callback, ac_name):
+async def get_ac(callback, ac_name):   
    conn = psycopg2.connect(
       host=host,
       user=user,
@@ -14,12 +21,11 @@ async def get_ac(callback, ac_name):
    )
    cur = conn.cursor()
    
-
-   cur.execute(f'SELECT "{ac_name}" FROM achievements WHERE id_tg = %s', [callback.message.chat.id])
-   if cur.fetchone()[0] != 1:
+   cur.execute(f'SELECT recieved FROM achievements WHERE id_tg = %s', [callback.message.chat.id])
+   if ac_name not in cur.fetchone()[0]:
       await callback.answer(text=f'Получено достижение!\n\n{ac_name}', show_alert=True)
-
-   cur.execute(f'UPDATE achievements SET "{ac_name}" = 1 WHERE id_tg=%s', [callback.message.chat.id])
+      
+   cur.execute(f"UPDATE achievements SET recieved = recieved || %s WHERE id_tg = %s", ([ac_name], callback.message.chat.id))
 
    conn.commit()
    cur.close()
@@ -62,6 +68,7 @@ async def busy_change(chat_id, status):
       database=db_name
    )
    cur = conn.cursor()
+      
    if status:
       cur.execute(f'UPDATE users SET busy = 1 WHERE id_tg=%s', [chat_id])
    else:
@@ -70,6 +77,32 @@ async def busy_change(chat_id, status):
    cur.close()
    conn.close()
    
+   # if redis_client.get('busy'):
+   #    await redis_client.delete('busy')
+   
+# async def busy_check(message):
+#    cached_data = redis_client.get('busy')
+#    if not cached_data:
+#       conn = psycopg2.connect(
+#          host=host,
+#          user=user,
+#          password=password,
+#          database=db_name
+#       )
+#       cur = conn.cursor()
+#       cur.execute(f'SELECT busy FROM users WHERE id_tg=%s', [message.chat.id])
+#       res = cur.fetchone()[0]
+#       cur.close()
+#       conn.close()
+      
+#       redis_client.set('busy', res)
+#    else:
+#       res = cached_data
+   
+#    if res == 1:
+#       return True
+#    return False
+
 async def busy_check(message):
    conn = psycopg2.connect(
       host=host,
@@ -82,10 +115,10 @@ async def busy_check(message):
    res = cur.fetchone()[0]
    cur.close()
    conn.close()
+   
    if res == 1:
       return True
    return False
-
 
 async def get_card(callback, card_id):
    conn = psycopg2.connect(

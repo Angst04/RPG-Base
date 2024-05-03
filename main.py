@@ -21,19 +21,12 @@ from core.base_funcs import busy_check, busy_change
 
 import psycopg2
 from core.config import TOKEN, DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
-import redis
 
 
 # логирование
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
-
-cache = redis.Redis(
-   host='localhost', 
-   port=6379, 
-   db=0
-)
 
 class RegisterMessages(StatesGroup):
    name = State()
@@ -43,16 +36,15 @@ async def cmd_menu(message: Message, state: FSMContext):
    # await busy_change(chat_id=message.chat.id, status=True)
    await message.answer('Здесь должно быть приветственное сообщение или что-то такое')
    
-   db.start()   
+   db.start()
    
    db.firstSeen(message.chat.id, 'users')
    db.firstSeen(message.chat.id, 'users_map')
    db.firstSeen(message.chat.id, 'transition_events')
    db.firstSeen(message.chat.id, 'achievements')
-   db.firstSeen(message.chat.id, 'collections')
-   db.firstSeen(message.chat.id, 'inventories')
    db.firstSeen(message.chat.id, 'quests')
    db.firstSeen(message.chat.id, 'fragments')
+   db.firstSeen(message.chat.id, 'cards')
    
    await sleep(1)
    
@@ -169,10 +161,9 @@ async def cmd_db(message: Message):
    db.firstSeen(message.chat.id, 'users_map')
    db.firstSeen(message.chat.id, 'transition_events')
    db.firstSeen(message.chat.id, 'achievements')
-   db.firstSeen(message.chat.id, 'collections')
-   db.firstSeen(message.chat.id, 'inventories')
    db.firstSeen(message.chat.id, 'quests')
    db.firstSeen(message.chat.id, 'fragments')
+   db.firstSeen(message.chat.id, 'cards')
    
    await message.answer('Пользователь добавлен в БД')
 

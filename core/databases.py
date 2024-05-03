@@ -45,7 +45,7 @@ def start():
                   health INTEGER DEFAULT 10,
                   money INTEGER DEFAULT 0,
                   busy INTEGER DEFAULT 0,
-                  enemy_health INTEGER DEFAULT 0, 
+                  enemy_health INTEGER DEFAULT 0,
                   menu_id INTEGER
       )''')
 
@@ -53,8 +53,8 @@ def start():
                   id serial PRIMARY KEY,
                   id_tg INTEGER,
                   now_location TEXT DEFAULT 'имение Чапси',
-                  Copper INTEGER DEFAULT 0,
-                  Emberwood INTEGER DEFAULT 0
+                  Коппер INTEGER DEFAULT 0,
+                  Эмбервуд INTEGER DEFAULT 0
       )''')
 
       cur.execute('''CREATE TABLE IF NOT EXISTS transition_events (
@@ -65,46 +65,66 @@ def start():
                   Чертополох INTEGER DEFAULT 0
       )''')
 
+      # cur.execute('''CREATE TABLE IF NOT EXISTS achievements (
+      #             id serial PRIMARY KEY,
+      #             id_tg INTEGER,
+      #             "Серьёзный выбор" INTEGER DEFAULT 0,
+      #             "Не менее серьёзный выбор" INTEGER DEFAULT 0
+      # )''')
+      
       cur.execute('''CREATE TABLE IF NOT EXISTS achievements (
                   id serial PRIMARY KEY,
                   id_tg INTEGER,
-                  "Серьёзный выбор" INTEGER DEFAULT 0,
-                  "Не менее серьёзный выбор" INTEGER DEFAULT 0
+                  recieved TEXT[] DEFAULT ARRAY['Серьёзный выбор']
       )''')
       
-      cur.execute('''CREATE TABLE IF NOT EXISTS inventories (
+      cur.execute('''CREATE TABLE IF NOT EXISTS cards (
                   id serial PRIMARY KEY,
                   id_tg INTEGER,
-                  card_1 TEXT DEFAULT 'c_0001',
-                  card_2 TEXT DEFAULT 'c_0002',
-                  card_3 TEXT DEFAULT '0',
-                  card_4 TEXT DEFAULT '0',
-                  card_5 TEXT DEFAULT '0',
-                  card_6 TEXT DEFAULT '0',
-                  card_7 TEXT DEFAULT '0',
-                  card_8 TEXT DEFAULT '0',
-                  card_9 TEXT DEFAULT '0'
+                  inventorie TEXT[] DEFAULT ARRAY['c_0001'],
+                  collection TEXT[] DEFAULT ARRAY['c_0001']
       )''')
       
-      cur.execute('''CREATE TABLE IF NOT EXISTS collections (
-                  id serial PRIMARY KEY,
-                  id_tg INTEGER,
-                  c_0001 INTEGER DEFAULT 1,
-                  c_0002 INTEGER DEFAULT 1,
-                  c_0003 INTEGER DEFAULT 0,
-                  c_0004 INTEGER DEFAULT 0,
-                  c_0005 INTEGER DEFAULT 0
-      )''')
+      # cur.execute('''CREATE TABLE IF NOT EXISTS inventories (
+      #             id serial PRIMARY KEY,
+      #             id_tg INTEGER,
+      #             card_1 TEXT DEFAULT 'c_0001',
+      #             card_2 TEXT DEFAULT 'c_0002',
+      #             card_3 TEXT DEFAULT '0',
+      #             card_4 TEXT DEFAULT '0',
+      #             card_5 TEXT DEFAULT '0',
+      #             card_6 TEXT DEFAULT '0',
+      #             card_7 TEXT DEFAULT '0',
+      #             card_8 TEXT DEFAULT '0',
+      #             card_9 TEXT DEFAULT '0'
+      # )''')
+      
+      # cur.execute('''CREATE TABLE IF NOT EXISTS collections (
+      #             id serial PRIMARY KEY,
+      #             id_tg INTEGER,
+      #             c_0001 INTEGER DEFAULT 1,
+      #             c_0002 INTEGER DEFAULT 1,
+      #             c_0003 INTEGER DEFAULT 0,
+      #             c_0004 INTEGER DEFAULT 0,
+      #             c_0005 INTEGER DEFAULT 0
+      # )''')
+      
+      # cur.execute('''CREATE TABLE IF NOT EXISTS quests (
+      #             id serial PRIMARY KEY,
+      #             id_tg INTEGER,
+      #             q_1 TEXT DEFAULT 'open',
+      #             q_2 TEXT DEFAULT 'close',
+      #             q_3 TEXT DEFAULT 'close',
+      #             q_4 TEXT DEFAULT 'close',
+      #             q_5 TEXT DEFAULT 'open',
+      #             q_6 TEXT DEFAULT 'close'
+      # )''')
       
       cur.execute('''CREATE TABLE IF NOT EXISTS quests (
                   id serial PRIMARY KEY,
                   id_tg INTEGER,
-                  q_1 TEXT DEFAULT 'open',
-                  q_2 TEXT DEFAULT 'close',
-                  q_3 TEXT DEFAULT 'close',
-                  q_4 TEXT DEFAULT 'close',
-                  q_5 TEXT DEFAULT 'open',
-                  q_6 TEXT DEFAULT 'close'
+                  active TEXT[],
+                  open TEXT[] DEFAULT ARRAY['q_1', 'q_5']
       )''')
       
       cur.execute('''CREATE TABLE IF NOT EXISTS fragments (
@@ -115,8 +135,8 @@ def start():
                   "Скрытый талант" INTEGER DEFAULT -1
       )''')
       
-   except Exception as e:
-      print('[CATCH ERROR]', type(e).__name__, e)
+   # except Exception as e:
+   #    print('[DB: CATCH ERROR]', type(e).__name__, e)
 
    finally:
       if conn:
@@ -138,10 +158,11 @@ def drop():
    cur.execute(f"DROP TABLE users_map;")
    cur.execute(f"DROP TABLE transition_events;")
    cur.execute(f"DROP TABLE achievements;")
-   cur.execute(f"DROP TABLE inventories;")
-   cur.execute(f"DROP TABLE collections;")
+   # cur.execute(f"DROP TABLE inventories;")
+   # cur.execute(f"DROP TABLE collections;")
    cur.execute(f"DROP TABLE quests;")
    cur.execute(f"DROP TABLE fragments;")
+   cur.execute(f"DROP TABLE cards;")
 
    cur.close()
    conn.close()
