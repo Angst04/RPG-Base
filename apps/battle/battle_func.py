@@ -1,7 +1,7 @@
 from asyncio import sleep
 from aiogram import Router, F
-from aiogram.types import InlineKeyboardButton, CallbackQuery
-from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.types import InlineKeyboardButton, CallbackQuery, WebAppInfo, KeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 
 import psycopg2
 from core.config import DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
@@ -40,9 +40,13 @@ async def battle_prepare(callback, text, photo, amount):
    
    builder_2.row(InlineKeyboardButton(text='Выбрать карту', callback_data='test_attack'))
    
+   builder_3 = ReplyKeyboardBuilder(resize_keyboard=True)
+   builder_3.row(KeyboardButton(text='Выбрать карту', web_app=WebAppInfo(url='https://0de7-2a00-1370-817a-4eea-d533-efae-5bee-afa.ngrok-free.app')))
+   
    await sleep(0.3)
    await callback.message.answer(text='Информация о вашем герое', reply_markup=builder_2.as_markup())
-   
+   await callback.message.answer(text='Выберите карту с помощью кнопки ниже', reply_markup=builder_3.as_markup())
+
    
 async def edit_health(callback, amount):
    builder = InlineKeyboardBuilder()

@@ -43,7 +43,7 @@ async def f(callback: CallbackQuery):
 
 @router.callback_query(F.data == 'battle_everton')
 async def f(callback: CallbackQuery):
-   await busy_change(chat_id=callback.message.chat.id, status=True)
+   # await busy_change(chat_id=callback.message.chat.id, status=True) # ВЕРНУТЬ НАЗАД!
    enemies = [
       'Лихорадочный',
       'Ворох'

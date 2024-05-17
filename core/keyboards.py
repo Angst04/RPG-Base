@@ -28,7 +28,7 @@ def kb_menu(chat_id):
    if now_location in enemy_loc:
       builder.row(InlineKeyboardButton(text='Поиск противника', callback_data='find_enemy'))
    builder.row(InlineKeyboardButton(text='Мои поручения', callback_data='my_quests'))
-   builder.row(InlineKeyboardButton(text='Инвентарь', web_app=WebAppInfo(url='https://fbb1-2a00-1370-817a-4eea-b066-c6af-e1aa-eca6.ngrok-free.app')))
+   builder.row(InlineKeyboardButton(text='Инвентарь', web_app=WebAppInfo(url='https://c4be-2a00-1370-817a-4eea-80f9-4b5a-b8a8-9cb.ngrok-free.app')))
    builder.row(InlineKeyboardButton(text='Дополнительно', callback_data='menu_other'))
    
    return builder.as_markup()

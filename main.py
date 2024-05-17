@@ -1,3 +1,4 @@
+from threading import Thread
 import asyncio
 from asyncio import sleep
 import logging
@@ -22,6 +23,20 @@ from core.base_funcs import busy_check, busy_change
 import psycopg2
 from core.config import TOKEN, DB_HOST as host, DB_USER as user, DB_PASSWORD as password, DB_NAME as db_name
 
+from fastapi import FastAPI, Request
+from multiprocessing import Process
+import uvicorn
+from starlette.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+app.add_middleware(
+   CORSMiddleware,
+   allow_origins=["*"],
+   allow_credentials=True,
+   allow_methods=["*"],
+   allow_headers=["*"],
+)
 
 # логирование
 logging.basicConfig(level=logging.INFO)
@@ -182,6 +197,17 @@ async def f(callback: CallbackQuery):
    await callback.answer('ТЫК')
 
 
+@app.post("/api/send_card")
+async def receive_data(request: Request):
+   data = await request.json()
+   user_id = data['user_id']
+   card_id = data['card_id']
+   await bot.send_message(user_id, f"Получены данные из веб-приложения: {card_id}")
+   return {"status": "ok"}
+
+def start_web():
+   uvicorn.run(app, host='0.0.0.0', port=8000)
+   
 async def main():
    dp.include_routers(main_menu.router, webapp.router, battle_main.router)
    dp.include_routers(test_storie.router, chapter_0.router)
@@ -191,4 +217,9 @@ async def main():
    await dp.start_polling(bot)
 
 if __name__ == "__main__":
+   web_process = Process(target=start_web)
+   web_process.start()
+
    asyncio.run(main())
+
+   web_process.join()
